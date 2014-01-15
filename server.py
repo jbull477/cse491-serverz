@@ -25,7 +25,6 @@ Content-type=text/html
 </html>
 
 """
-
 print 'Entering infinite loop; hit CTRL-C to exit'
 while True:
     # Establish connection with client.    
