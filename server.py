@@ -16,7 +16,7 @@ s.listen(5)                 # Now wait for client connection.
 htmlResponse = """
 
 HTTP/1.0 200 OK
-Content-type=text/html
+Content-Type: text/html
 
 <html>
   <body>
