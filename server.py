@@ -18,24 +18,50 @@ def main():
     
     while True:
         # Establish connection with client.    
-        c, (client_host, client_port) = s.accept()   
+        c, (client_host, client_port) = s.accept()
         handle_connection(c)
         
     
 
 def handle_connection(conn):
-    print conn.recv(1000)
-    #print 'Got connection from', client_host, client_port 
-    
-    # Define strings
+    info = conn.recv(1000)
+    print info
     htmlHeader = 'HTTP/1.0 200 OK\r\n'
     htmlContentType = 'Content-type: text/html\r\n\r\n'
-    htmlBody = '<h1>Hello, world.</h1>This is jbull477\'s Web server.'
+    htmlBody = ' '
+    
+    request = info.split(' ')
+    try:
+        host = request[3].split('\r')
+        host = host[0]
+    except IndexError:
+        host = '';
+    
+    if request[1] == '/':
+        contentLink = host + '/content'
+        fileLink = host + '/file'
+        imageLink = host + '/image'
+        htmlBody = '<p><a href=\"http://' + contentLink + '\">Content</a>\r\n</p>' \
+                   '<p><a href=\"http://' + fileLink + '\">Files</a>\r\n</p>' \
+                   '<p><a href=\"http://' + imageLink + '\">Images</a></p>'
+    elif request[1] == '/content':
+        htmlBody = 'This is the content page!'
+    elif request[1] == '/file':
+        htmlBody = 'This is the file page!'
+    elif request[1] == '/image':
+        htmlBody = 'This is the image page!'
+    else:
+        htmlBody = '<h2>This page does not exist!</h2>'
+    
+    #print 'Got connection from', client_host, client_port 
+    
+    
 
     
     conn.send(htmlHeader)
     conn.send(htmlContentType)
     conn.send(htmlBody)
+    send-post-request()
     conn.close()
 
 if __name__ == '__main__':
