@@ -61,7 +61,6 @@ def handle_connection(conn):
     conn.send(htmlHeader)
     conn.send(htmlContentType)
     conn.send(htmlBody)
-    send-post-request()
     conn.close()
 
 if __name__ == '__main__':
