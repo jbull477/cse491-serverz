@@ -76,3 +76,13 @@ def test_handle_image_connection():
     server.handle_connection(image_conn)
 
     assert image_conn.sent == image_return, 'Got: %s' % (repr(image_conn.sent),)
+
+def test_post_request():
+    post_conn = FakeConnection("POST /image HTTP/1.0\r\n\r\n")
+
+    post_return = 'hello world'
+
+    server.handle_connection(post_conn)
+
+    assert post_conn.sent == post_return, 'Got: %s' % (repr(post_conn.sent),)
+    

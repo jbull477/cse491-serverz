@@ -31,36 +31,35 @@ def handle_connection(conn):
     htmlBody = ' '
     
     request = info.split(' ')
-    try:
-        host = request[3].split('\r')
-        host = host[0]
-    except IndexError:
-        host = '';
-    
-    if request[1] == '/':
-        contentLink = host + '/content'
-        fileLink = host + '/file'
-        imageLink = host + '/image'
-        htmlBody = '<p><a href=\"http://' + contentLink + '\">Content</a>\r\n</p>' \
-                   '<p><a href=\"http://' + fileLink + '\">Files</a>\r\n</p>' \
-                   '<p><a href=\"http://' + imageLink + '\">Images</a></p>'
-    elif request[1] == '/content':
-        htmlBody = 'This is the content page!'
-    elif request[1] == '/file':
-        htmlBody = 'This is the file page!'
-    elif request[1] == '/image':
-        htmlBody = 'This is the image page!'
-    else:
-        htmlBody = '<h2>This page does not exist!</h2>'
-    
-    #print 'Got connection from', client_host, client_port 
-    
-    
+    if request[0] == 'GET':
+        try:
+            host = request[3].split('\r')
+            host = host[0]
+        except IndexError:
+            host = '';
+        
+        if request[1] == '/':
+            contentLink = host + '/content'
+            fileLink = host + '/file'
+            imageLink = host + '/image'
+            htmlBody = '<p><a href=\"http://' + contentLink + '\">Content</a>\r\n</p>' \
+                       '<p><a href=\"http://' + fileLink + '\">Files</a>\r\n</p>' \
+                       '<p><a href=\"http://' + imageLink + '\">Images</a></p>'
+        elif request[1] == '/content':
+            htmlBody = 'This is the content page!'
+        elif request[1] == '/file':
+            htmlBody = 'This is the file page!'
+        elif request[1] == '/image':
+            htmlBody = 'This is the image page!'
+        else:
+            htmlBody = '<h2>This page does not exist!</h2>'
 
-    
-    conn.send(htmlHeader)
-    conn.send(htmlContentType)
-    conn.send(htmlBody)
+        conn.send(htmlHeader)
+        conn.send(htmlContentType)
+        conn.send(htmlBody)
+    elif request[0] == 'POST':
+        conn.send('hello world')
+        
     conn.close()
 
 if __name__ == '__main__':
