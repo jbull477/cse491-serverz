@@ -21,8 +21,8 @@ def main():
         c, (client_host, client_port) = s.accept()
         handle_connection(c)
         
-    
 
+# Handles the connection
 def handle_connection(conn):
     info = conn.recv(1000)
     print info
