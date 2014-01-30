@@ -136,3 +136,14 @@ def test_handle_post_submit():
     server.handle_connection(submit_conn)
 
     assert submit_conn.sent == submit_return, 'Got: %s' % (repr(submit_conn.sent),)
+    
+def test_handle_no_page():
+    conn = FakeConnection("GET /youdontexist HTTP/1.0\r\n\r\n")
+
+    expected_return = 'HTTP/1.0 200 OK\r\n' + \
+             'Content-type: text/html\r\n\r\n' + \
+             '<h2>This page does not exist!</h2>'
+
+    server.handle_connection(conn)
+
+    assert conn.sent == expected_return, 'Got: %s' % (repr(conn.sent),)
