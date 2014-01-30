@@ -125,7 +125,7 @@ def test_handle_get_submit():
     assert submit_conn.sent == submit_return, 'Got: %s' % (repr(submit_conn.sent),)
 
 def test_handle_post_submit():
-    submit_conn = FakeConnection("POST /submit HTTP/1.0\r\n\r\n firstName=Jason&lastName=Bull")
+    submit_conn = FakeConnection("POST /submit HTTP/1.0\r\n\r\nfirstName=Jason&lastName=Bull")
 
     submit_return = 'HTTP/1.0 200 OK\r\n' + \
              'Content-type: text/html\r\n\r\n' + \

@@ -114,14 +114,10 @@ def handle_submit(conn, urlInfo, info, reqType):
         query = urlInfo.query
     elif reqType == "POST":
         query = info.splitlines()[-1]
-        print query
         
     data = parse_qs(query)
-    print data
     firstName = data['firstName'][0]
     lastName = data['lastName'][0]
-    print firstName
-    print lastName
     greeting = 'Hello Mr. {0} {1}.'.format(firstName, lastName)
     toSend = 'HTTP/1.0 200 OK\r\n' + \
              'Content-type: text/html\r\n\r\n' + \
