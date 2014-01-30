@@ -6,3 +6,5 @@
 a ‘Content-type’ of text/html, and a message body saying ‘<h1>Hello, world</h1> this is jbull477’s Web server.
 
 1/19/2014:  Updated sever.py so that carriage returns and newlines are used when returning the HTTP response.
+
+1/29/2014:  Updated server.py so that there are forms and submissions.  Cleaned up some of the code.
