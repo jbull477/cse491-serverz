@@ -2,6 +2,8 @@
 import random
 import socket
 import time
+from urlparse import urlparse
+from urlparse import parse_qs
 
 def main():
     s = socket.socket()         # Create a socket object
@@ -25,12 +27,12 @@ def main():
 # Handles the connection
 def handle_connection(conn):
     info = conn.recv(1000)
-    print info
-    htmlHeader = 'HTTP/1.0 200 OK\r\n'
-    htmlContentType = 'Content-type: text/html\r\n\r\n'
-    htmlBody = ' '
     
     request = info.split(' ')
+    urlRequest = request[1]
+    urlInfo = urlparse(urlRequest)
+    urlPath = urlInfo.path
+    
     if request[0] == 'GET':
         try:
             host = request[3].split('\r')
@@ -38,29 +40,108 @@ def handle_connection(conn):
         except IndexError:
             host = '';
         
-        if request[1] == '/':
-            contentLink = host + '/content'
-            fileLink = host + '/file'
-            imageLink = host + '/image'
-            htmlBody = '<p><a href=\"http://' + contentLink + '\">Content</a>\r\n</p>' \
-                       '<p><a href=\"http://' + fileLink + '\">Files</a>\r\n</p>' \
-                       '<p><a href=\"http://' + imageLink + '\">Images</a></p>'
-        elif request[1] == '/content':
-            htmlBody = 'This is the content page!'
-        elif request[1] == '/file':
-            htmlBody = 'This is the file page!'
-        elif request[1] == '/image':
-            htmlBody = 'This is the image page!'
+        if urlPath == '/':
+            handle_index(conn, urlInfo)
+        elif urlPath == '/content':
+            handle_content(conn, urlInfo)
+        elif urlPath == '/file':
+            handle_file(conn, urlInfo)
+        elif urlPath == '/image':
+            handle_image(conn, urlInfo)
+        elif urlPath == '/form':
+            handle_form(conn, urlInfo)
+        elif urlPath == '/submit':
+            handle_submit(conn, urlInfo, info, 'GET')
         else:
-            htmlBody = '<h2>This page does not exist!</h2>'
-
-        conn.send(htmlHeader)
-        conn.send(htmlContentType)
-        conn.send(htmlBody)
+            handle_no_page(conn, urlInfo)
     elif request[0] == 'POST':
-        conn.send('hello world')
+        if urlPath == '/submit':
+           handle_submit(conn, urlInfo, info, 'POST')
+        else:
+            handle_post(conn, info)
         
     conn.close()
+
+def handle_index(conn, urlInfo):
+    toSend = 'HTTP/1.0 200 OK\r\n' + \
+             'Content-type: text/html\r\n\r\n' + \
+             '<h1>Hello, world.</h1>' + \
+             'This is jbull477\'s web server.' + \
+             '<ul>' + \
+             '<li><a href="/content">Content</a></li>' + \
+             '<li><a href="/file">Files</a></li>' + \
+             '<li><a href="/image">Images</a></li>' + \
+             '<li><a href="/form">Form</a></li>' + \
+             '</ul>'
+    conn.send(toSend)
+
+def handle_content(conn, urlInfo):
+    toSend = 'HTTP/1.0 200 OK\r\n' + \
+             'Content-type: text/html\r\n\r\n' + \
+             '<p>This is the content page!</p>'
+    conn.send(toSend)
+
+def handle_file(conn, urlInfo):
+    toSend = 'HTTP/1.0 200 OK\r\n' + \
+             'Content-type: text/html\r\n\r\n' + \
+             '<p>This is the file page!</p>'
+    conn.send(toSend)
+
+def handle_image(conn, urlInfo):
+    toSend = 'HTTP/1.0 200 OK\r\n' + \
+             'Content-type: text/html\r\n\r\n' + \
+             '<p>This is the image page!</p>'
+    conn.send(toSend)
+
+def handle_form(conn, urlInfo):
+    forms = 'HTTP/1.0 200 OK\r\n' + \
+            'Content-type: text/html\r\n' + \
+            '\r\n' + \
+            "<form action='/submit' method='GET'>" + \
+            "First Name:<input type='text' name='firstName'>" + \
+            "Last Name:<input type='text' name='lastName'>" + \
+            "<input type='submit' value='Submit Get'>" + \
+            "</form>\r\n" + \
+            "<form action='/submit' method='POST'>" + \
+            "First Name:<input type='text' name='firstName'>" + \
+            "Last Name:<input type='text' name='lastName'>" + \
+            "<input type='submit' value='Submit Post'>" + \
+            "</form>\r\n"
+    conn.send(forms)
+
+def handle_submit(conn, urlInfo, info, reqType):
+    if reqType == "GET":
+        query = urlInfo.query
+    elif reqType == "POST":
+        query = info.splitlines()[-1]
+        print query
+        
+    data = parse_qs(query)
+    print data
+    firstName = data['firstName'][0]
+    lastName = data['lastName'][0]
+    print firstName
+    print lastName
+    greeting = 'Hello Mr. {0} {1}.'.format(firstName, lastName)
+    toSend = 'HTTP/1.0 200 OK\r\n' + \
+             'Content-type: text/html\r\n\r\n' + \
+             '<p>' + \
+             greeting + \
+             '</p>'
+    conn.send(toSend)
+
+def handle_no_page(conn, urlInfo):
+    toSend = 'HTTP/1.0 200 OK\r\n' + \
+             'Content-type: text/html\r\n\r\n' + \
+             '<h2>This page does not exist!</h2>'
+    conn.send(toSend)
+
+def handle_post(conn, info):
+    toSend = 'HTTP/1.0 200 OK\r\n' + \
+             'Content-type: text/html\r\n\r\n' + \
+             '<h2>hello world</h2>'
+    conn.send(toSend)
+    
 
 if __name__ == '__main__':
     main()
