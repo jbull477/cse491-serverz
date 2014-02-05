@@ -10,3 +10,5 @@ a ‘Content-type’ of text/html, and a message body saying ‘<h1>Hello, world
 1/19/2014:  Updated sever.py so that carriage returns and newlines are used when returning the HTTP response.
 
 1/23/2014:  Finished hw2.  POST requests are handled and all tests are working.
+
+1/29/2014:  Updated server.py so that there are forms and submissions.  Cleaned up some of the code.
