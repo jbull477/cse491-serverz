@@ -4,6 +4,9 @@ import socket
 import time
 from urlparse import urlparse
 from urlparse import parse_qs
+import cgi
+from StringIO import StringIO
+#import jinja2
 
 def main():
     s = socket.socket()         # Create a socket object
@@ -26,7 +29,9 @@ def main():
 
 # Handles the connection
 def handle_connection(conn):
-    info = conn.recv(1000)
+    info = conn.recv(1)
+    while info[-4:] != '\r\n\r\n':
+        info += conn.recv(1)
     
     request = info.split(' ')
     urlRequest = request[1]
