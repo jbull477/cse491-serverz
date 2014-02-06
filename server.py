@@ -104,6 +104,7 @@ def handle_post(conn, path, info):
                   '/submit' : post_submit }
 
     conn.send(okay_header)
+    print params
     conn.send(app_content)
     conn.send(post_pages[page](conn, params))
 

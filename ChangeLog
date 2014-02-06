@@ -12,3 +12,5 @@ a ‘Content-type’ of text/html, and a message body saying ‘<h1>Hello, world
 1/23/2014:  Finished hw2.  POST requests are handled and all tests are working.
 
 1/29/2014:  Updated server.py so that there are forms and submissions.  Cleaned up some of the code.
+
+2/6/2014:  Got templating to work as well as arbitrary size requests.  Did not get FieldStorage to work.  Not sure how to do yet.
