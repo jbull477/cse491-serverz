@@ -58,7 +58,7 @@ def handle_connection(conn):
 def handle_get(conn, path, info):
     params = parse_qs(urlparse(path)[4])
     page = urlparse(path)[2]
-
+    vars_dict = {}
     get_pages = { '/'  :  'index.html',  \
                   '/favicon.ico'  :  'index.html',  \
                   '/content'  : 'content.html',  \
@@ -71,9 +71,10 @@ def handle_get(conn, path, info):
         template = env.get_template(get_pages[page])
         if(page == "/submit"):
             firstName, lastName = handle_submit(conn, urlparse(info.split(' ')[1]), info, info.split(' ')[0])
+            vars_dict = {'firstName': firstName, 'lastName': lastName}
         conn.send(okay_header)
         conn.send(text_content)
-        conn.send(template.render(params))
+        conn.send(template.render(vars_dict))
     else:
         template = env.get_template('error.html')
         conn.send(error_header)

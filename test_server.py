@@ -104,7 +104,8 @@ def test_handle_get_submit():
     server.handle_connection(conn)
     result = conn.sent
     if('HTTP/1.0 200 OK' and \
-       'Content-type: text/html') not in result:
+       'Content-type: text/html' and \
+       'Hello Mr. Jason Bull') not in result:
         assert False
     else:
         pass
