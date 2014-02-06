@@ -6,7 +6,17 @@ from urlparse import urlparse
 from urlparse import parse_qs
 import cgi
 from StringIO import StringIO
-#import jinja2
+import jinja2
+
+
+#Globals
+app_content = 'Content-type: application/x-www-form-urlencoded\r\n\r\n'
+error_header = 'HTTP/1.0 404 Not Found\r\n'
+multi_content = 'Content-type: multipart/form-data\r\n\r\n'
+okay_header = 'HTTP/1.0 200 OK\r\n'
+text_content = 'Content-type: text/html\r\n\r\n'
+loader = jinja2.FileSystemLoader('./templates')
+env = jinja2.Environment(loader=loader)
 
 def main():
     s = socket.socket()         # Create a socket object
@@ -37,82 +47,64 @@ def handle_connection(conn):
     urlRequest = request[1]
     urlInfo = urlparse(urlRequest)
     urlPath = urlInfo.path
-    
+
     if request[0] == 'GET':
-        try:
-            host = request[3].split('\r')
-            host = host[0]
-        except IndexError:
-            host = '';
-        
-        if urlPath == '/':
-            handle_index(conn, urlInfo)
-        elif urlPath == '/content':
-            handle_content(conn, urlInfo)
-        elif urlPath == '/file':
-            handle_file(conn, urlInfo)
-        elif urlPath == '/image':
-            handle_image(conn, urlInfo)
-        elif urlPath == '/form':
-            handle_form(conn, urlInfo)
-        elif urlPath == '/submit':
-            handle_submit(conn, urlInfo, info, 'GET')
-        else:
-            handle_no_page(conn, urlInfo)
+        handle_get(conn, urlPath, info)
     elif request[0] == 'POST':
-        if urlPath == '/submit':
-           handle_submit(conn, urlInfo, info, 'POST')
-        else:
-            handle_post(conn, info)
-        
+        handle_post(conn, urlPath)
     conn.close()
 
-def handle_index(conn, urlInfo):
-    toSend = 'HTTP/1.0 200 OK\r\n' + \
-             'Content-type: text/html\r\n\r\n' + \
-             '<h1>Hello, world.</h1>' + \
-             'This is jbull477\'s web server.' + \
-             '<ul>' + \
-             '<li><a href="/content">Content</a></li>' + \
-             '<li><a href="/file">Files</a></li>' + \
-             '<li><a href="/image">Images</a></li>' + \
-             '<li><a href="/form">Form</a></li>' + \
-             '</ul>'
-    conn.send(toSend)
+# Taken from leflerja
+def handle_get(conn, path, info):
+    params = parse_qs(urlparse(path)[4])
+    page = urlparse(path)[2]
 
-def handle_content(conn, urlInfo):
-    toSend = 'HTTP/1.0 200 OK\r\n' + \
-             'Content-type: text/html\r\n\r\n' + \
-             '<p>This is the content page!</p>'
-    conn.send(toSend)
+    get_pages = { '/'  :  'index.html',  \
+                  '/favicon.ico'  :  'index.html',  \
+                  '/content'  : 'content.html',  \
+                  '/file'  :  'files.html',  \
+                  '/image'  :  'image.html',  \
+                  '/form'  :  'get_form.html',  \
+                  '/submit'  :  'get_submit.html'  }
+    print page
+    if page in get_pages:
+        template = env.get_template(get_pages[page])
+        if(page == "/submit"):
+            firstName, lastName = handle_submit(conn, urlparse(info.split(' ')[1]), info, info.split(' ')[0])
+        conn.send(okay_header)
+        conn.send(text_content)
+        conn.send(template.render(params))
+    else:
+        template = env.get_template('error.html')
+        conn.send(error_header)
+        conn.send(text_content)
+        conn.send(template.render())
+    
+# Taken from leflerja
+def handle_post(conn, path, info):
+    headers = []
+    body = ""
+    has_body = False
 
-def handle_file(conn, urlInfo):
-    toSend = 'HTTP/1.0 200 OK\r\n' + \
-             'Content-type: text/html\r\n\r\n' + \
-             '<p>This is the file page!</p>'
-    conn.send(toSend)
+    for line in request.split("\r\n"):
+        if has_body:
+            body = line
+            continue
+        if line == "":
+            has_body = True
+        headers.append(line)
 
-def handle_image(conn, urlInfo):
-    toSend = 'HTTP/1.0 200 OK\r\n' + \
-             'Content-type: text/html\r\n\r\n' + \
-             '<p>This is the image page!</p>'
-    conn.send(toSend)
+    path = request.split()[1]
+    page = urlparse(path)[2]
+    params = parse_qs(body)
 
-def handle_form(conn, urlInfo):
-    forms = 'HTTP/1.0 200 OK\r\n' + \
-            'Content-type: text/html\r\n' + \
-            '\r\n' + \
-            "<form action='/submit' method='GET'>" + \
-            "First Name:<input type='text' name='firstName'>" + \
-            "Last Name:<input type='text' name='lastName'>" + \
-            "<input type='submit' value='Submit Get'>" + \
-            "</form>\r\n" + \
-            "<form action='/submit' method='POST'>" + \
-            "First Name:<input type='text' name='firstName'>" + \
-            "Last Name:<input type='text' name='lastName'>" + \
-            "<input type='submit' value='Submit Post'>" + \
-            "</form>\r\n"
-    conn.send(forms)
+    post_pages = {'/' : post_request, \
+                  '/form' : post_form, \
+                  '/submit' : post_submit }
+
+    conn.send(okay_header)
+    conn.send(app_content)
+    conn.send(post_pages[page](conn, params))
 
 def handle_submit(conn, urlInfo, info, reqType):
     if reqType == "GET":
@@ -123,25 +115,29 @@ def handle_submit(conn, urlInfo, info, reqType):
     data = parse_qs(query)
     firstName = data['firstName'][0]
     lastName = data['lastName'][0]
-    greeting = 'Hello Mr. {0} {1}.'.format(firstName, lastName)
-    toSend = 'HTTP/1.0 200 OK\r\n' + \
-             'Content-type: text/html\r\n\r\n' + \
-             '<p>' + \
-             greeting + \
-             '</p>'
-    conn.send(toSend)
-
-def handle_no_page(conn, urlInfo):
-    toSend = 'HTTP/1.0 200 OK\r\n' + \
-             'Content-type: text/html\r\n\r\n' + \
-             '<h2>This page does not exist!</h2>'
-    conn.send(toSend)
+    return (firstName, lastName)
 
 def handle_post(conn, info):
     toSend = 'HTTP/1.0 200 OK\r\n' + \
              'Content-type: text/html\r\n\r\n' + \
              '<h2>hello world</h2>'
     conn.send(toSend)
+
+def post_request(conn, request):
+    return 'HTTP/1.0 200 OK\r\n\r\n' + \
+           'This is a post request'
+
+def post_form(conn, params):
+    return '<h1>Form Page</h1>\r\n' + \
+           '<form action=\'/submit\' method=\'POST\'>\r\n' + \
+           'First Name: <input type=\'text\' name=\'firstname\'><br>\r\n' + \
+           'Last Name: <input type=\'text\' name=\'lastname\'><br>\r\n' + \
+           '<input type=\'submit\' name=\'submit\'>\r\n' + \
+           '</form>\r\n'
+
+def post_submit(conn, params):
+    return '<h1>Submit Page</h1>\r\n' + \
+           'Hello {0} {1}'.format(params['firstname'][0], params['lastname'][0])
     
 
 if __name__ == '__main__':
