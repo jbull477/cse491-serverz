@@ -6,6 +6,8 @@ from urlparse import urlparse
 from StringIO import StringIO
 from app import make_app
 
+#Rough week, tried to do this but eventually got from brtaylor92
+
 def handle_connection(conn):
     # Start reading in data from the connection
     req = conn.recv(1)
