@@ -16,3 +16,5 @@ a ‘Content-type’ of text/html, and a message body saying ‘<h1>Hello, world
 2/6/2014:  Got templating to work as well as arbitrary size requests.  Did not get FieldStorage to work.  Not sure how to do yet.
 
 2/6/2014 v2:  Got things working by stealing code (couldn't figure out the first part of the hw)...no shame.
+
+2/13/2014:  Got things to work by stealing code (got templating done, but app.py and server.py were not working how they should).  Got from brtaylor92.

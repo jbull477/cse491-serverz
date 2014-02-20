@@ -1,66 +1,60 @@
-#! /usr/bin/env python
-import cgi
-import jinja2
+#!/usr/bin/env python
 import random
 import socket
-from StringIO import StringIO
 import time
-import urllib
-from urlparse import urlparse, parse_qs
+from urlparse import urlparse
+from StringIO import StringIO
+from app import make_app
 
-# Taken from leflerja to get this working
+#Rough week, tried to do this but eventually got from brtaylor92
 
 def handle_connection(conn):
-    okay_response = 'HTTP/1.0 200 OK\r\nContent-type: text/html\r\n\r\n'
-    error_response = 'HTTP/1.0 404 Not Found\r\nContent-type: text/html\r\n\r\n'
-    loader = jinja2.FileSystemLoader('./templates')
-    env = jinja2.Environment(loader=loader)
-    
-    request = conn.recv(1)
+    # Start reading in data from the connection
+    req = conn.recv(1)
     count = 0
-    while request[-4:] != '\r\n\r\n':
-        request += conn.recv(1)
-    
-    request, headers = request.split('\r\n',1)
-    d = {}
-    for line in headers.split('\r\n')[:-2]:
+    env = {}
+    while req[-4:] != '\r\n\r\n':
+        req += conn.recv(1)
+
+    # Parse the headers we've received
+    req, data = req.split('\r\n',1)
+    headers = {}
+    for line in data.split('\r\n')[:-2]:
         k, v = line.split(': ', 1)
-        d[k.lower()] = v
+        headers[k.lower()] = v
 
-    request_type = request.split()[0]
-    path = urlparse(request.split(' ', 3)[1])
-    page = path[2]
+    # Parse out the path and related info
+    path = urlparse(req.split(' ', 3)[1])
+    env['REQUEST_METHOD'] = 'GET'
+    env['PATH_INFO'] = path[2]
+    env['QUERY_STRING'] = path[4]
+    env['CONTENT_TYPE'] = 'text/html'
+    env['CONTENT_LENGTH'] = 0
 
-    my_pages = {'/' : 'index.html', \
-                '/content' : 'content.html', \
-                '/file' : 'files.html', \
-                '/image' : 'image.html', \
-                '/form' : 'get_form.html', \
-                '/submit' : 'get_submit.html' }
-
-    # Check for POST
-    body = ''
-    if request_type == 'POST':
-        while len(body) < int(d['content-length']):
-            body += conn.recv(1)
-        e = {'REQUEST_METHOD' : 'POST'}
-        fs = cgi.FieldStorage(fp=StringIO(body), headers=d, environ=e)
-        params = {}
-        for key in fs.keys():
-            params[key] = fs[key].value
-    else:
-        params = parse_qs(path[4])
-        
-    # Create and send response
-    if page not in my_pages:
-        template = env.get_template('error.html')
-        error_response += template.render()
-        conn.send(error_response)
-    else:
-        template = env.get_template(my_pages[page])
-        okay_response += template.render(params)
-        conn.send(okay_response)
+    def start_response(status, response_headers):
+        conn.send('HTTP/1.0 ')
+        conn.send(status)
+        conn.send('\r\n')
+        for pair in response_headers:
+            key, header = pair
+            conn.send(key + ': ' + header + '\r\n')
+        conn.send('\r\n')
+    
+    content = ''
+    if req.startswith('POST '):
+        env['REQUEST_METHOD'] = 'POST'
+        env['CONTENT_LENGTH'] = headers['content-length']
+        env['CONTENT_TYPE'] = headers['content-type']
+        while len(content) < int(headers['content-length']):
+            content += conn.recv(1)
+    
+    env['wsgi.input'] = StringIO(content)
+    appl = make_app()
+    result = appl(env, start_response)
+    for data in result:
+        conn.send(data)
     conn.close()
+    
 
 def main():
     s = socket.socket() # Create a socket object
@@ -70,15 +64,16 @@ def main():
 
     print 'Starting server on', host, port
     print 'The Web server URL for this would be http://%s:%d/' % (host, port)
-    
-    s.listen(5) # Now wait for client connection
+
+    s.listen(5) # Now wait for client connection.
 
     print 'Entering infinite loop; hit CTRL-C to exit'
     while True:
-        # Establish connection with client
+        # Establish connection with client.
         c, (client_host, client_port) = s.accept()
         print 'Got connection from', client_host, client_port
         handle_connection(c)
-
-if __name__ == '__main__':
+        
+# boilerplate
+if __name__ == "__main__":
     main()
