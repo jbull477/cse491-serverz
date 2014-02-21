@@ -48,6 +48,10 @@ def app(environ, start_response):
             headers = [('Content-type', 'image/jpeg')]
             status = '200 OK'
             response_content = handle_image(environ, env)
+        elif path == '/form':
+            headers = [('Content-type', 'text/html')]
+            status = '200 OK'
+            response_content = handle_form(environ, env)    
         elif path == '/submit':
             status = '200 OK'
             response_content = handle_submit_get(environ, env)
@@ -65,6 +69,9 @@ def handle_index(params, env):
     
 def handle_content(params, env):
     return str(env.get_template("content.html").render())
+
+def handle_form(params, env):
+    return str(env.get_template("form.html").render())
 
 def readFile(filepath):
     ''' Reads a file and returns its contents as a string '''
