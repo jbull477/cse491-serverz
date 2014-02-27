@@ -1,22 +1,81 @@
 2014-01-07  Titus Brown  <t@Titus-MacBook-Air-2.local>
 
  * Initialized repository, created server.py and README.
+
+2014-01-15  Justin Fila  <filajust@arctic.cse.msu.edu>
  
-Jason Bull:
+ * Added an HTTP response and a header/body to display in the browser
+ * reviewed this too.
 
-1/15/2014:  Updated server.py to return an HTTP 1.0 response containing ‘200 OK’ response line,
-a ‘Content-type’ of text/html, and a message body saying ‘<h1>Hello, world</h1> this is jbull477’s Web server.
+2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
 
-1/19/2014:  Updated sever.py so that carriage returns and newlines are used when returning the HTTP response.
+ * Fixed some formatting and merged in changes from code review
 
-1/23/2014:  Finished hw2.  POST requests are handled and all tests are working.
+2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
 
-1/29/2014:  Updated server.py so that there are forms and submissions.  Cleaned up some of the code.
+ * Made the test work (test_server.py)
 
-2/6/2014:  Got templating to work as well as arbitrary size requests.  Did not get FieldStorage to work.  Not sure how to do yet.
+2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
 
-2/6/2014 v2:  Got things working by stealing code (couldn't figure out the first part of the hw)...no shame.
+ * Added different http response for /content, /file, and /image urls
 
-2/13/2014:  Got things to work by stealing code (got templating done, but app.py and server.py were not working how they should).  Got from brtaylor92.
+2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
 
-2/20/2014:  Got hw6 done.  Got from brtaylor92.
+ * added more tests to the test_server script, differentiate between GET and POST
+
+2014-01-23  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * fixed the index out of bounds error
+
+2014-01-26  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added a form page and a submission page that parses the query
+
+2014-01-28  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * did the post request parsing, and added more functions
+
+2014-01-30  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * fixed the tests. Now works for post requests
+
+2014-01-30  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added check for empty name variables
+
+2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * refactored some functions
+
+2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * made templating html work, added multipart post, recv works for arbitrary data
+
+2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * fixed tests
+
+2014-02-13  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * made server work like wsgi server
+
+2014-02-13  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * html templates inherit from base.html now
+
+2014-02-20  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added quixote wsgi app, made images and plain text work in my app, added
+ * validation to the wsgi app
+
+2014-02-20  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * fixed tests, used validation from wsgiref
+
+2014-02-26  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added cookie to environ variable
+
+2014-02-27  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * updated tests

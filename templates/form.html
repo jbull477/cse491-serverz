@@ -1,14 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}
+{% block header %}
 
-Image
+<title>Form</title>
 
 {% endblock %}
 
-{% block content %}
+{% block content%}
 
-<h1>Wow. Such page. Very HTTP response</h1>
-This is some image.
+<p>Please fill in name</p>
+<form action='{{ submit_url }}' method='GET'>
+    First Name: <input type='text' name='firstname'>
+    Last Name: <input type='text' name='lastname'>
+    <input type='submit' value='Submit'>
+</form>
 
 {% endblock %}
