@@ -1,56 +1,137 @@
-# encoding: utf-8
-# taken from brtaylor92
+# from http://docs.python.org/2/library/wsgiref.html
 
-import jinja2
-from urlparse import parse_qs
-from urllib import unquote
 import cgi
+import urlparse
+import jinja2
+from wsgiref.util import setup_testing_defaults
 
 def app(environ, start_response):
-    # The dict of pages we know how to get to
-    response = {
-                '/' : 'index.html', \
-                '/content' : 'content.html', \
-                '/file' : 'files.html', \
-                '/image' : 'images.html', \
-                '/form' : 'form.html', \
-                '/submit' : 'submit.html', \
-               }
-
-    # Basic connection information and set up templates
     loader = jinja2.FileSystemLoader('./templates')
     env = jinja2.Environment(loader=loader)
-    response_headers = [('Content-type', 'text/html')]
 
-    # Check if we got a path to an existing page
-    if environ['PATH_INFO'] in response:
-        status = '200 OK'
-        template = env.get_template(response[environ['PATH_INFO']])
-    else:
-        status = '404 Not Found'
-        template = env.get_template('error.html')
-
-    # Set up template arguments
-    x = parse_qs(environ['QUERY_STRING']).iteritems()
-    args = {k : v[0] for k,v in x}
-    args['path'] = environ['PATH_INFO']
-
-    # Grab POST args if there are any
-    if environ['REQUEST_METHOD'] == 'POST':
-        headers = {k[5:].lower().replace('_','-') : v \
-                    for k,v in environ.iteritems() if(k.startswith('HTTP'))}
-        headers['content-type'] = environ['CONTENT_TYPE']
-        headers['content-length'] = environ['CONTENT_LENGTH']
-        fs = cgi.FieldStorage(fp=environ['wsgi.input'], \
-                                headers=headers, environ=environ)
-        args.update({x : fs[x].value for x in fs.keys()})
-
-    args = {k : v.decode('cp1252').encode('ascii', 'xmlcharrefreplace') \
-            for k,v in args.iteritems()}
+    # By default, set up the 404 page response. If it's
+    # a valid page, we change this. If some weird stuff
+    # happens, it'll default to 404.
+    status = '404 Not Found'
+    response_content = not_found('', env)
+    headers = [('Content-type', 'text/html')]
     
-    # Return the page
-    start_response(status, response_headers)
-    return [bytes(template.render(args))]
+    try:
+        http_method = environ['REQUEST_METHOD']
+        path = environ['PATH_INFO']
+    except:
+        pass
+
+    if http_method == 'POST':
+        if path == '/':
+            # I feel like there's a better way of doing this
+            # than spamming status = '200 OK'. But it's almost 10
+            # and we have to catch up because our capstone group
+            # member just didn't do anything the past week. /rant
+            status = '200 OK'
+            response_content = handle_index(environ, env)
+        elif path == '/submit':
+            status = '200 OK'
+            response_content = handle_submit_post(environ, env)
+    elif http_method == 'GET':
+        if path == '/':
+            status = '200 OK'
+            response_content = handle_index(environ, env)
+        elif path == '/content':
+            status = '200 OK'
+            response_content = handle_content(environ, env)
+        elif path == '/file':
+            headers = [('Content-type', 'text/plain')]
+            status = '200 OK'
+            response_content = handle_file(environ, env)
+        elif path == '/image':
+            headers = [('Content-type', 'image/jpeg')]
+            status = '200 OK'
+            response_content = handle_image(environ, env)
+        elif path == '/form':
+            headers = [('Content-type', 'text/html')]
+            status = '200 OK'
+            response_content = handle_form(environ, env)    
+        elif path == '/submit':
+            status = '200 OK'
+            response_content = handle_submit_get(environ, env)
+                
+    start_response(status, headers)
+    response = []
+    response.append(response_content)
+    return response
 
 def make_app():
     return app
+
+def handle_index(params, env):
+    return str(env.get_template("index.html").render())
+    
+def handle_content(params, env):
+    return str(env.get_template("content.html").render())
+
+def handle_form(params, env):
+    return str(env.get_template("form.html").render())
+
+def readFile(filepath):
+    ''' Reads a file and returns its contents as a string '''
+    f = open(filepath, 'rb')
+    data = f.read()
+    f.close()
+
+    return data
+
+def handle_file(params, env):
+    return readFile('./files/text.txt')
+
+def handle_image(params, env):
+    return readFile('./images/troll.jpg')
+
+def not_found(params, env):
+    return str(env.get_template("error.html").render())
+
+def handle_submit_post(environ, env):
+    ''' Handle a connection given path /submit '''
+    # submit needs to know about the query field, so more
+    # work needs to be done here.
+
+    # we want the first element of the returned list
+    headers = {}
+    for k in environ.keys():
+        headers[k.lower()] = environ[k]
+
+    form = cgi.FieldStorage(headers = headers, fp = environ['wsgi.input'],
+                            environ = environ)
+
+    try:
+      firstname = form['firstname'].value
+    except KeyError:
+      firstname = ''
+    try:
+      lastname = form['lastname'].value
+    except KeyError:
+      lastname = ''
+
+    vars = dict(firstname = firstname, lastname = lastname)
+    return str(env.get_template("submit.html").render(vars))
+
+def handle_submit_get(environ, env):
+    ''' Handle a connection given path /submit '''
+    # submit needs to know about the query field, so more
+    # work needs to be done here.
+
+    # we want the first element of the returned list
+    params = environ['QUERY_STRING']
+    params = urlparse.parse_qs(params)
+
+    try:
+      firstname = params['firstname'][0]
+    except KeyError:
+      firstname = ''
+    try:
+      lastname = params['lastname'][0]
+    except KeyError:
+      lastname = ''
+
+    vars = dict(firstname = firstname, lastname = lastname)
+    return str(env.get_template("submit.html").render(vars))

@@ -1,10 +1,14 @@
 {% extends "base.html" %}
+
+{% block title %}
+
+Image
+
+{% endblock %}
+
 {% block content %}
-  <p>
-    <form action='/submit' method='GET'>
-      First Name:<input type='text' name='firstName'>
-      Last Name:<input type='text' name='lastName'>
-      <input type='submit' value='Submit Get'>
-    </form>
-  </p>
+
+<h1>Wow. Such page. Very HTTP response</h1>
+This is some image.
+
 {% endblock %}
