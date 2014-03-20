@@ -1,22 +1,24 @@
-2014-01-07  Titus Brown  <t@Titus-MacBook-Air-2.local>
+2014-01-07 Titus Brown <t@Titus-MacBook-Air-2.local>
 
  * Initialized repository, created server.py and README.
  
 Jason Bull:
 
-1/15/2014:  Updated server.py to return an HTTP 1.0 response containing ‘200 OK’ response line,
+1/15/2014: Updated server.py to return an HTTP 1.0 response containing ‘200 OK’ response line,
 a ‘Content-type’ of text/html, and a message body saying ‘<h1>Hello, world</h1> this is jbull477’s Web server.
 
-1/19/2014:  Updated sever.py so that carriage returns and newlines are used when returning the HTTP response.
+1/19/2014: Updated sever.py so that carriage returns and newlines are used when returning the HTTP response.
 
-1/23/2014:  Finished hw2.  POST requests are handled and all tests are working.
+1/23/2014: Finished hw2. POST requests are handled and all tests are working.
 
-1/29/2014:  Updated server.py so that there are forms and submissions.  Cleaned up some of the code.
+1/29/2014: Updated server.py so that there are forms and submissions. Cleaned up some of the code.
 
-2/6/2014:  Got templating to work as well as arbitrary size requests.  Did not get FieldStorage to work.  Not sure how to do yet.
+2/6/2014: Got templating to work as well as arbitrary size requests. Did not get FieldStorage to work. Not sure how to do yet.
 
-2/6/2014 v2:  Got things working by stealing code (couldn't figure out the first part of the hw)...no shame.
+2/6/2014 v2: Got things working by stealing code (couldn't figure out the first part of the hw)...no shame.
 
-2/13/2014:  Got things to work by stealing code (got templating done, but app.py and server.py were not working how they should).  Got from brtaylor92.
+2/13/2014: Got things to work by stealing code (got templating done, but app.py and server.py were not working how they should). Got from brtaylor92.
 
-2/20/2014:  Got hw6 done.  Got from brtaylor92.
+2/20/2014: Got hw6 done. Got from brtaylor92.
+
+2/27/2014: Got hw7 done. Got from filajust. 
