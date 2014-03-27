@@ -1,0 +1,43 @@
+2014-01-07  Titus Brown  <t@Titus-MacBook-Air-2.local>
+
+ * Initialized repository, created server.py and README.
+
+
+2014-01-15 Eric Austin 
+
+ * Completed Homework 1.  Updated server.py to include the HTTP 1.0 response
+   and print out my netID and git username.
+
+
+2014-01-22 Eric Austin
+
+ * Completed Homework 2.  Added additional GET page responses and POST
+   response.  And testing for them all.
+
+
+2014-01-29 Eric Austin
+
+ * Completed Homework 3.  Added POST and GET forms and tests.
+
+
+2014-02-06 Eric Austin
+
+ * Completed Homework 4. Cannot for the life of me figure out what I am
+   doing wrong with the tests.  It's late and I am tired.  I'll figure
+   it out eventually.
+   
+   
+2014-02-12 Eric Austin
+
+ * Working on Homework 5.  Have everything working now except for the
+   GET and POST submit forms.
+   
+204-03-20 Eric Austin
+
+ * Working Homework 8. (Homework 6 and 7 work too, just forgot to update the ChangeLog).
+   The project that I have added was the thumbnail images.
+   Instructions on how to run my program now:
+     In command line type "python2.7 server.py -A myapp" and it will give you a link to an address.
+     Visit that address and click on the "Thumbnail" link, that will take you to the page i added.
+
+
