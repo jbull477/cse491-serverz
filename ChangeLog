@@ -1,35 +1,145 @@
 2014-01-07  Titus Brown  <t@Titus-MacBook-Air-2.local>
-	* Initialized repository, created server.py and README.
 
-2014-01-09  Ben Taylor	<taylo886@arctic.cse.msu.edu>
-	*	Updated server.py to respond with 200 OK, send "Hello World" html
+ * Initialized repository, created server.py and README.
 
-2014-01-17  Ben Taylor  <taylo886@arctic.cse.msu.edu>
-	*	Updated server.py to respond to different URLs, post requests
-	*	Added a nose test script
-	*	Fixed server.py to pass nose tests
+2014-01-15  Justin Fila  <filajust@arctic.cse.msu.edu>
+ 
+ * Added an HTTP response and a header/body to display in the browser
+ * reviewed this too.
 
-2014-01-23  Ben Taylor  <taylo886@arctic.cse.msu.edu>
-	*	Updated server.py to split  less
-	*	Replaced multiple if/else with dict
-	*	Updated tests slightly to match modified html content
-2014-01-30  Ben Taylor <taylo886@arctic.cse.msu.edu>
-	*	Revamp tests
-	*	Fix POST
-	*	Check and increase test coverage
-2014-02-05  Ben Taylor <taylo886@arctic.cse.msu.edu>
-	*	Fix FieldStorage
-	*	Update to work with arbitrary length requests
-	*	Refactor everything into handle_connection
-	*	Generally tidy up code
-	*	Templates with jinja2
-2014-02-13	Ben Taylor <taylo886@arctic.cse.msu.edu>
-	*	Update to work with unicode
-	*	Make app and server separate, wsgi compliant
-2014-03-20
-	* 	Added /imagelist url to display thumbnails of all images
-		* New template with for-loop
-		* New app function to list images in the dir
+2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
 
-2014-03-27
-	*	Look at twill (dev branch) on my github
+ * Fixed some formatting and merged in changes from code review
+
+2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * Made the test work (test_server.py)
+
+2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * Added different http response for /content, /file, and /image urls
+
+2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added more tests to the test_server script, differentiate between GET and POST
+
+2014-01-23  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * fixed the index out of bounds error
+
+2014-01-26  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added a form page and a submission page that parses the query
+
+2014-01-28  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * did the post request parsing, and added more functions
+
+2014-01-30  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * fixed the tests. Now works for post requests
+
+2014-01-30  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added check for empty name variables
+
+2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * refactored some functions
+
+2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * made templating html work, added multipart post, recv works for arbitrary data
+
+2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * fixed tests
+
+2014-02-13  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * made server work like wsgi server
+
+2014-02-13  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * html templates inherit from base.html now
+
+2014-02-20  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added quixote wsgi app, made images and plain text work in my app, added
+ * validation to the wsgi app
+
+2014-02-20  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * fixed tests, used validation from wsgiref
+
+2014-02-26  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * added cookie to environ variable
+
+2014-02-27  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * updated tests
+
+2014-03-20  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * HW 8
+ * Added commandline arguments, differentiate between different apps, 
+ * added twil tests
+ * 
+ * Project - modify imageapp to accept jpg and tiffs
+ * modified image.py to store the image data and the type
+ * use that value when loading the image to specify the type
+
+2014-03-27  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * HW 9
+ * Added chat app and quotes app to the server
+ * Added timestamp to chat app
+ * 
+ * Project - swipe template from oswd.org and use it
+ *           in imageapp server
+ * In root.py (in the imageapp folder), made it return 
+ * the css when a css file was requested, and also
+ * return images when an image was requested. Did 
+ * this using StaticDirectory 
+ * 
+ * Can test this simply by running:
+ * python server.py -A imageapp
+ *  
+ * The template should come up with the dice image
+ * on the front page. The other pages can be 
+ * navigated to using the links at the top
+
+2014-04-02  Justin Fila  <filajust@arctic.cse.msu.edu>
+
+ * HW 10
+ * 
+ * Projects 
+ * (1) project 23 - Write a URL handler so that each image is referred to byi
+ *     its number
+ * 
+ *     in root.py, check the dictionary that you get from the request. If it
+ *     has 'special=latest' in it then get the final image
+ * 
+ *     if it has 'num=whatever' in it then get whatever image number it is
+ *     asking for (with bounds checking)
+ * 
+ *     Can test this simply by running:
+ *        "python server.py -A imageapp" then navigating to image_raw and the
+ *        image number you want.   ex: image_raw?num=1 
+ *  
+ * (2) project 5 - Add a URL that provides a list of images, resized to
+ *     thumbnails
+ * 
+ *     I created a new function in root.py (image_list) that renders a
+ *     new html template. The number of images is passed to the template
+ *     using a dictionary. Inside that html, I grab that number and loop
+ *     that many times using the url implented from project 23 to display
+ *     the correct image
+ * 
+ *     Can test this simply by running:
+ *        "python server.py -A imageapp" then uploading a few pictures, then
+ *        navigating to the tab titled "Image List"
+ * 
+ 
+

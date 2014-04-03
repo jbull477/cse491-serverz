@@ -37,12 +37,10 @@ $(document).ready(function() {
 
         author = $("author", message).text();
         content = $("text", message).text();
-        time = new Date();
-        time.setTime(timestamp*1000)
+        time = $("messtime", message).text();
 
-        $("#messagewindow").prepend("<i>[" + time.toLocaleString() + "] </i>" + "<b>" 
-                                    + author + "</b>:" + content 
-                                    + "<br>");
+        $("#messagewindow").prepend("<b>" + author + "</b>: " + content 
+                                    + " (sent at " + time + " sec)<br>");
      });
   };
 
