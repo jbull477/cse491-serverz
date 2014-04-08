@@ -9,7 +9,7 @@ class RootDirectory(Directory):
     _q_exports = ['static']
     static = StaticDirectory(os.path.join(os.path.dirname(__file__),'static'))
 
-    @export(name='')                    # this makes it public.
+    @export(name='') # this makes it public.
     def index(self):
         return html.render('index.html')
 
@@ -60,7 +60,7 @@ class RootDirectory(Directory):
             image_count = image.get_image_num()
 
             if image_num > image_count:
-                image_num = image_count 
+                image_num = image_count
             elif image_num < 0:
                 image_num = 0
 
