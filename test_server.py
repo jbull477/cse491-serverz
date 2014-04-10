@@ -25,112 +25,152 @@ class FakeConnection(object):
     def close(self):
         self.is_closed = True
 
-def test_handle_connection_slash():
-    conn = FakeConnection("GET / HTTP/1.0\r\n\r\n")
-    er = 'HTTP/1.0 200 OK\r\n'
+# Test a basic GET call.
+def test_handle_connection():
+    conn = FakeConnection("GET / HTTP/1.0\r\n \
+            \r\n\r\n")
+    partial_expected_return = 'HTTP/1.0 200 OK'
 
-    server.handle_connection(conn, 80)
+    server.handle_connection(conn, 'imageapp')
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
-def test_handle_connection_content():
-    conn = FakeConnection("GET /content HTTP/1.0\r\n\r\n")
-    er = 'HTTP/1.0 200 OK\r\n'
+def test_handle_connection_to_upload_hw7():
+    conn = FakeConnection("GET /upload HTTP/1.0\r\n \
+            \r\n\r\n")
+    
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Upload'
 
-    server.handle_connection(conn, 80)
+    server.handle_connection(conn, 'imageapp')
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
-def test_handle_connection_file():
-    conn = FakeConnection("GET /file HTTP/1.0\r\n\r\n")
-    er = 'HTTP/1.0 200 OK\r\n'
+def test_handle_connection_to_content():
+    conn = FakeConnection("GET /content HTTP/1.0\r\n \
+            \r\n\r\n")
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Content'
 
-    server.handle_connection(conn, 80)
+    server.handle_connection(conn, 'myapp')
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
-def test_handle_connection_image():
-    conn = FakeConnection("GET /image HTTP/1.0\r\n\r\n")
-    er = 'HTTP/1.0 200 OK\r\n'
+def test_handle_connection_to_image():
+    conn = FakeConnection("GET /image HTTP/1.0\r\n \
+            \r\n\r\n")
 
-    server.handle_connection(conn, 80)
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Content-type: image/jpg'
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    server.handle_connection(conn, 'myapp')
 
-def test_get_form():
-    conn = FakeConnection("GET /form HTTP/1.0\r\n\r\n")
-    er = 'HTTP/1.0 200 OK\r\n'
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
-    server.handle_connection(conn, 80)
+def test_handle_connection_to_image_hw7():
+    conn = FakeConnection("GET /image HTTP/1.0\r\n \
+            \r\n\r\n")
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'image'
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    server.handle_connection(conn, 'imageapp')
 
-def test_404():
-    conn = FakeConnection("GET /asdf HTTP/1.0\r\n\r\n")
-    er = 'HTTP/1.0 404 Not Found\r\n'
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
-    server.handle_connection(conn, 80)
+def test_handle_connection_to_file():
+    conn = FakeConnection("GET /file HTTP/1.0\r\n \
+            \r\n\r\n")
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Content-type: text/plain'
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    server.handle_connection(conn, 'myapp')
 
-def test_submit_get():
-    fname = "Ben"
-    lname = "Taylor"
-    conn = FakeConnection("GET /submit?firstname={0}&lastname={1} \
-                           HTTP/1.0\r\n\r\n".format(fname, lname))
-    er = 'HTTP/1.0 200 OK\r\n'
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
-    server.handle_connection(conn, 80)
+'''
+def test_handle_error_post_request():
+    conn = FakeConnection("POST / HTTP/1.0\r\n \
+            \r\n\r\n")
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Error'
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)  
+    server.handle_connection(conn, 'myapp')
 
-def test_submit_post_urlencoded():
-    fname = "Ben"
-    lname = "Taylor"
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
+'''
+
+def test_handle_urlencoded_post():
     conn = FakeConnection("POST /submit HTTP/1.0\r\n" + \
-                           "Content-Length: 29\r\n" + \
-                           "Content-Type: application/x-www-form-urlencoded\r\n\r\n" + \
-                           "firstname={0}&lastname={1}\r\n".format(fname, lname))
-    er = 'HTTP/1.0 200 OK\r\n'
+            "From: test@testy.com\n" + \
+            "User-Agent: HTTPTool/1.0\n" + \
+            "Content-Type: application/x-www-form-urlencoded\n" + \
+            "Content-Length: 31\r\n\r\n" + \
+            "firstname=Test&lastname=Testing")
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Test Testing'
 
-    server.handle_connection(conn, 80)
+    server.handle_connection(conn, 'myapp')
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
-def test_submit_post_multipart():
+def test_handle_multipart_post():
     conn = FakeConnection("POST /submit HTTP/1.0\r\n" + \
-                          "Content-Length: 374\r\n" + \
-                          "Content-Type: multipart/form-data; " + \
-                          "boundary=32452685f36942178a5f36fd94e34b63\r\n\r\n" + \
-                          "--32452685f36942178a5f36fd94e34b63\r\n" + \
-                          "Content-Disposition: form-data; name=\"lastname\";" + \
-                          " filename=\"lastname\"\r\n\r\n" + \
-                          "taylor\r\n" + \
-                          "--32452685f36942178a5f36fd94e34b63\r\n" + \
-                          "Content-Disposition: form-data; name=\"firstname\";" + \
-                          " filename=\"firstname\"\r\n\r\n" + \
-                          "ben\r\n" + \
-                          "--32452685f36942178a5f36fd94e34b63\r\n" + \
-                          "Content-Disposition: form-data; name=\"key\";" + \
-                          " filename=\"key\"\r\n\r\n" + \
-                          "value\r\n" + \
-                          "--32452685f36942178a5f36fd94e34b63--\r\n"
-                    )
-    fname = 'ben'
-    lname = 'taylor'
-    er = 'HTTP/1.0 200 OK\r\n'
+            "From: test@testy.com\n" + \
+            "User-Agent: HTTPTool/1.0\n" + \
+            "Content-Type: multipart/form-data; boundary=---------------------------55261788821295539881451415414\n" + \
+            "Content-Length: 3373\r\n\r\n" + \
+            "-----\n" + \
+            "content:  ------------------------55261788821295539881451415414\n" + \
+            "Content-Disposition: form-data; name=\"files\"; filename=\"Astronaut.png\"\n" + \
+            "Content-Type: image/png")
 
-    server.handle_connection(conn, 80)
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Multipart'
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    server.handle_connection(conn, 'myapp')
 
-def test_submit_post_404():
-    conn = FakeConnection("POST /asdf HTTP/1.0\r\n" + \
-                          "Content-Length: 0\r\n" + \
-                          "Content-Type: application/x-www-form-urlencoded\r\n\r\n"
-                         )
-    server.handle_connection(conn, 80)
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
 
-    er = 'HTTP/1.0 404 Not Found\r\n'
+def test_handle_submit_get():
+    conn = FakeConnection("GET /submit?firstname=Test&lastname=Testing HTTP/1.0\r\n \r\n\r\n")
+    
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Test Testing'
 
-    assert conn.sent[:len(er)] == er, 'Got: %s' % (repr(conn.sent),)
+    server.handle_connection(conn, 'myapp')
+
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
+
+def test_handle_form_get():
+    conn = FakeConnection("GET /form HTTP/1.0\r\n\n\r\n\r\n")
+
+    partial_expected_return = '<form action=\'/submit\''
+    status = 'HTTP/1.0 200 OK'
+
+    server.handle_connection(conn, 'myapp')
+
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
+
+'''
+def test_handle_altdemo():
+    conn = FakeConnection("GET / HTTP/1.0\r\n\n\r\n\r\n")
+
+    status = 'HTTP/1.0 200 OK'
+    partial_expected_return = 'Quixote Session'
+
+    server.reset_connection()
+    server.handle_connection(conn, 'altdemoapp')
+
+    assert status in conn.sent, 'Got: %s' % (repr(conn.sent),)
+    assert partial_expected_return in conn.sent, 'Got: %s' % (repr(conn.sent),)
+'''
