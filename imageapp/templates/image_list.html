@@ -2,14 +2,20 @@
 
 {% block content %}
 
-Here is your list of images:
-<br/>
+<h2>Here are all of the images that have been uploaded!</h2>
+(most recently uploaded first)
+<div id="imageContainer">
+</div>
 <script type="text/javascript">
-num_images = {{ num_images }}
-for (var i=0;i<=num_images;i++)
-{
-  document.write("<img border='2' style='max-height:150px; max-width:150px' src='image_raw?num=" + i + "'/><br/>");
-}
+    $.post("image_count",
+         function(count) { 
+            count = parseInt(count);
+            for (var i = count; i > 0; i--) {
+                $("#imageContainer").append("<div style='padding-top:10px'>" + 
+                    "<a href='/image?num=" + i + "'>" +
+                    "<img width='200' src='image_raw?num=" + i + "' /></a></div>");
+            }
+         }
+    );
 </script>
-
 {% endblock %}

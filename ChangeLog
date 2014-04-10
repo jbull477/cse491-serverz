@@ -2,144 +2,104 @@
 
  * Initialized repository, created server.py and README.
 
-2014-01-15  Justin Fila  <filajust@arctic.cse.msu.edu>
- 
- * Added an HTTP response and a header/body to display in the browser
- * reviewed this too.
+2014-01-14 Cameron Keif
+ * Return HTTP response to client
 
-2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
+2014-01-22 Cameron Keif
+ * Added test_server.py for automated testing.
+ * Return different responses for /, /content, /file, and /image paths.
+ * Differentiate between GET and POST requests.
 
- * Fixed some formatting and merged in changes from code review
+2014-01-29 Cameron Keif
+ * Added support for HTML forms, using both GET and POST.
 
-2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
+2014-02-6 Cameron Keif
+* Can now handle POST requests with Content-Type of multipart/form-data
+* Read requests of arbitrary size
+* Utilize HTML templating
+* Add 404 page
 
- * Made the test work (test_server.py)
+2014-02-13 Cameron Keif
+* Refactor to WSGI application architecture
+* Utilize HTML templating inheritance
 
-2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
+2014-02-20 Cameron Keif
+* /file and /image now serve the appropriate content types, text/plain and image/jpeg
+* Utilize wsgiref validator
+* Add and test with Quixote demo apps
 
- * Added different http response for /content, /file, and /image urls
+2014-20-27 Cameron Keif
+* Add cookie header handling to WSGI server
+* Add image upload application, imageapp
+* Modified imageapp to display latest image on index page
 
-2014-01-22  Justin Fila  <filajust@arctic.cse.msu.edu>
+2014-3-20 Cameron Keif
+* Implemented command line options in server.py to run imageapp, quixote demo app, and app.py
+* Add twill tests for all 3 applications
+* PROJECT: Change imageapp to support JPEG and TIFF. (5pts)
+    
+    - Summary: imageapp will now allow users to upload JPEG and TIFF images instead
+      of only PNGs and display them. PNG images are still supported. Most browsers
+      don't support TIFF very well without extensions.
 
- * added more tests to the test_server script, differentiate between GET and POST
+    - This was primarily done by modifying the code in imageapp/image.py and 
+      imageapp/root.py.
 
-2014-01-23  Justin Fila  <filajust@arctic.cse.msu.edu>
+    - In image.py, I add_image was modified to accept an additional parameter, filename, 
+      which is the filename of the image. This is added in a tuple with the image data 
+      to the images dictionary in the form (filename, data).
 
- * fixed the index out of bounds error
+    - Now, get_image/get_latest_image will return (filename, data). This is utilized in
+      root.py. In image_raw, rather than setting the reponse content type to image/png,
+      the filename is parsed to find the extension. That file extension is used to
+      determine what the content type should be set to (image/jpeg for .jpg/.jpeg and
+      image/tiff for .tif/.tiff). The file extension is not case senstive, .TIF will
+      work just as .tif would.
 
-2014-01-26  Justin Fila  <filajust@arctic.cse.msu.edu>
+2014-3-20 Cameron Keif
+  * Integrated quotes app
+  * Integrated chat app and added a timestamp to each image in the chat window
+  * PROJECT: Add a URL that provides a list of images, resized to thumbnails (you can just img size, not
+    actual resizing – that will be a separate project ;).
 
- * added a form page and a submission page that parses the query
+    - Summary: There's a link on the index page to see a list of all the images that were uploaded. It shows
+      the most recently updated image first.
 
-2014-01-28  Justin Fila  <filajust@arctic.cse.msu.edu>
+    - I added a check in get_image_raw() to see if the request included a query parameter "num". If so, 
+      rather than getting the most recent image, it gets the image at images[num]. I also added a method to
+      return the count of images. Using these two things, I can make a few ajax calls in the image list page
+      to iterate over images and display every image.
 
- * did the post request parsing, and added more functions
+2014-4-2 Cameron Keif
+  * PROJECT: Add the ability to comment on images
+    - You can post a comment on an image from the /image page.
 
-2014-01-30  Justin Fila  <filajust@arctic.cse.msu.edu>
+    - I made an Image class that has a list of comments for that string.
 
- * fixed the tests. Now works for post requests
+    - A request to the get_comments url provided an image number returns XML containing all of its comments.
+      If the image number is not included it defaults to the latest image
 
-2014-01-30  Justin Fila  <filajust@arctic.cse.msu.edu>
+  * PROJECT: Add url handler to refer to each image by its number.
+    - /image_raw?imageNum=# will return the image with num = #.
 
- * added check for empty name variables
+    - If # is not numeric, or is off the end of the list, it defaults to the latest image.
 
-2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+    - If you go to the images list ( /image_list ) each image is a link to the URL for that image (so the
+      second to the bottom image links to /image?imageNum=1 for example)
 
- * refactored some functions
+2014-4-9 Cameron Keif
+	* Implement cookie app
+	* Utilize SQLite to store images
+	* PROJECT: Add data persistence in sqlite
 
-2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+	- I decided to expand on the SQLite stuff and utilize SQlite to store my
+	  comments and other stuff as well. It's an actual website now omg. :)
 
- * made templating html work, added multipart post, recv works for arbitrary data
+	* PROJECT: Add starring, ranking, and a simple recommendation system for
+	  your image app image list.
 
-2014-02-04  Justin Fila  <filajust@arctic.cse.msu.edu>
+	- I added a field in the image_store table to hold the image's score.
 
- * fixed tests
-
-2014-02-13  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * made server work like wsgi server
-
-2014-02-13  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * html templates inherit from base.html now
-
-2014-02-20  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * added quixote wsgi app, made images and plain text work in my app, added
- * validation to the wsgi app
-
-2014-02-20  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * fixed tests, used validation from wsgiref
-
-2014-02-26  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * added cookie to environ variable
-
-2014-02-27  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * updated tests
-
-2014-03-20  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * HW 8
- * Added commandline arguments, differentiate between different apps, 
- * added twil tests
- * 
- * Project - modify imageapp to accept jpg and tiffs
- * modified image.py to store the image data and the type
- * use that value when loading the image to specify the type
-
-2014-03-27  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * HW 9
- * Added chat app and quotes app to the server
- * Added timestamp to chat app
- * 
- * Project - swipe template from oswd.org and use it
- *           in imageapp server
- * In root.py (in the imageapp folder), made it return 
- * the css when a css file was requested, and also
- * return images when an image was requested. Did 
- * this using StaticDirectory 
- * 
- * Can test this simply by running:
- * python server.py -A imageapp
- *  
- * The template should come up with the dice image
- * on the front page. The other pages can be 
- * navigated to using the links at the top
-
-2014-04-02  Justin Fila  <filajust@arctic.cse.msu.edu>
-
- * HW 10
- * 
- * Projects 
- * (1) project 23 - Write a URL handler so that each image is referred to byi
- *     its number
- * 
- *     in root.py, check the dictionary that you get from the request. If it
- *     has 'special=latest' in it then get the final image
- * 
- *     if it has 'num=whatever' in it then get whatever image number it is
- *     asking for (with bounds checking)
- * 
- *     Can test this simply by running:
- *        "python server.py -A imageapp" then navigating to image_raw and the
- *        image number you want.   ex: image_raw?num=1 
- *  
- * (2) project 5 - Add a URL that provides a list of images, resized to
- *     thumbnails
- * 
- *     I created a new function in root.py (image_list) that renders a
- *     new html template. The number of images is passed to the template
- *     using a dictionary. Inside that html, I grab that number and loop
- *     that many times using the url implented from project 23 to display
- *     the correct image
- * 
- *     Can test this simply by running:
- *        "python server.py -A imageapp" then uploading a few pictures, then
- *        navigating to the tab titled "Image List"
- * 
- 
-
+	- On the image page you can upvote/downvote images. Once I have
+	  authentication I can change this so each user can only upvote/downvote
+		once. For now, you can just click it as much as you want.
