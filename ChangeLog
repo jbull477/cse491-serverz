@@ -190,3 +190,4 @@
  *     I added a function to image.py that creates the 
  *     image as a dictionary when added to the database.
 
+2014-4-17 Jason Bull:  Made sure that things were working.
