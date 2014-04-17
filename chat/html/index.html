@@ -28,6 +28,9 @@ $(document).ready(function() {
 
      // update timestamp value from XML
      timestamp = $("time", xml).text();
+     now = new Date();
+     chat_time = now.getHours() + ':' + now.getMinutes() +
+                 ':' + now.getSeconds();
 
      // for each 'message' block in the XML, retrieve author & content, then
      // post.
@@ -37,9 +40,9 @@ $(document).ready(function() {
 
         author = $("author", message).text();
         content = $("text", message).text();
-        var date = new Date(timestamp * 1000);
-        $("#messagewindow").prepend(date.toLocaleTimeString() + " <b> " + author + "</b>: " + content
-                                    + "<br>");
+
+        $("#messagewindow").prepend("(" + chat_time + ") " +
+          "<b>" + author + "</b>: " + content + "<br>");
      });
   };
 
@@ -89,12 +92,10 @@ $(document).ready(function() {
   <form id="chatform">
 
 Name: <input type="text" id="author" />
-<p>
 Message: <input type="text" id="message" />
-</p>
-<p>
+
    <input type="submit" value="ok" /><br />
-</p>
+
 </form>
 </div>
 

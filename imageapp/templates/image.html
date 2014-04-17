@@ -2,92 +2,37 @@
 
 {% block content %}
 
-Here is your image:
+<h2>Here is your image:</h2>
 <p>
-<div id="imageContainer"></div>
-<p>
-Score: <span id="score"></span>
-<p>
-<button id='upvote_button'>Upvote</button>
-<p>
-<button id='downvote_button'>Downvote</button>
-<p>
-<h2>Comments</h2>
-<ul id="comments">
-</ul>
-<input type="text" id='add_comment' />
-<button id="add_comment_button">Add Comment</button>
-<script type="text/javascript">
-var imageNum = window.location.href.split("?num=")[1]
+<img width=40% src='image_raw?special=latest'/>
+</p>
 
-imageHtml = ''
+{% if message %}
+  {% for i in message %}
+  <p>{{ i['alert'] }}</p>
+  {% endfor %}
+{% endif %}
 
-if($.isNumeric(imageNum)) {
-    imageHtml = "<img width=40% src='image_raw?num=" + imageNum + "' />"
-    console.log(imageHtml)
-} else {
-    // Just show the latest if they're a jerk and used a non numeric value
-    imageHtml = "<img width=40% src='image_raw?special=latest'/>"
-}
+{% if comments %}
+<table border=1 cellpadding=1 cellspacing=1>
 
-$("#imageContainer").append(imageHtml)
+  {% for i in comments %}
+  <tr>
+    <td id="thin">{{ i['user'] }}</td>
+    <td valign="top">{{ i['words'] }}</td>
+    <td id="thin">
+      <a href=delete_comment?ci={{ i['index'] }}>delete</a>
+    </td>
+  </tr>
+  {% endfor %}
 
-$.post("get_score?num=" + imageNum,
-    function(score) {
-        score = parseInt(score);
-        if (isNaN(score)){
-            $("#score").append(0)
-        }
-        else {
-            $("#score").append(score)
-        }
-        
-    });
+</table>
+{% endif %}
 
-$.post("get_comments?num=" + imageNum,
-    function(xml) { 
-        console.log(imageNum)
-        console.log(xml)
-        $("comment", xml).each( function(id) {
-            comment = $("comment", xml).get(id)
-            $(comments).append("<li>" + ($("text", comment).text()) + "</li>")
-        });
-    });
+<p>Add a comment:</p>
+<form enctype='multipart/form-data' action='add_comment' method='POST'>
+<p><input type='text' name='comm' size=100></p>
+<p><input type='submit'></p>
+</form>
 
-$("#add_comment_button").click(function() {
-    $.post("add_comment",
-        {
-            num        :   imageNum,
-            comment    :   $("#add_comment").val(),
-        })
-    .success(function(){
-        $("#comments").prepend("<li>" + $("#add_comment").val() + "</li>")
-        $("#add_comment").val('')
-    })
-});
-
-$("#upvote_button").click(function() {
-    console.log(imageNum);
-    $.post("increment_score?num=" + imageNum,
-        function() {
-        var score = $("#score").text()
-        score = parseInt(score)
-        score += 1
-        $("#score").empty()
-        $("#score").append(score)
-    });
-});
-
-$("#downvote_button").click(function() {
-    console.log(imageNum);
-    $.post("decrement_score?num=" + imageNum,
-        function() {
-        var score = $("#score").text()
-        score = parseInt(score)
-        score -= 1
-        $("#score").empty()
-        $("#score").append(score)
-    });
-});
-</script>
 {% endblock %}

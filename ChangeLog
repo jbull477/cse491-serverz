@@ -1,105 +1,237 @@
+2014-04-13  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * Projects: I'm done! I did the following projects and 2 blog posts.
+        3 - CSS template
+        4 - Support for JPEG and TIFF images
+        5 - Thumbnail gallery
+        6 - Metadata uploading, storage, and retrieval
+        7 - Meatdata searching
+        8 - Image comments
+        9 - Image tracking via login and cookies
+       15 - Account creation, login, and authentication
+       16 - SQLite database
+
+ * thumbnail.html: Fixed display mechanism to show 4 or fewer images per row.
+ * blogs: I added the blogs directory to hold the 2 blog posts I did.
+ * index.html: I removed this page, it redirected to image.html anyway.
+ * images: I added the safari.jpg image to the sample data.
+ * comments.txt: I added a comments file with sample data. It is loaded
+       when the database is created.
+ * Project 8: I added the ability for users to delete their comments only.
+
+2014-04-11  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * Project 8: I added the ability to comment on images. I added a "comments"
+       table to the database. It stores the index of the image, the username
+       of the commenter, and the comment. When an image is displayed, all
+       comments associated with it are shown in a table below it. Below the
+       comment table is a form to add a comment. The user enters a comment and
+       clicks the submit button. If they are not logged in, or the comment
+       field is empty, an error message is displayed. Otherwise, the comment
+       is inserted in the database and displayed. When an image or user is
+       deleted, all associated comments are also deleted.
+
+2014-04-11  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * Project 9: I used the project 15 features added previously to implement
+       this project. I added an "owner" column to the image_store table.
+
+     Upload: The image owners username is stored with the image when it's
+       uploaded. The username is grabbed from the cookie in root.py. If the
+       user is not logged in when attempting to upload, an error message is
+       displayed and the upload does not happen.
+
+     Deletion: The Image List page accessible through the left menu lists all
+       images in the database, with their descriptions and owner's usernames.
+       When a user clicks the "delete" link next to an image, the image is
+       deleted from the database, and the image list page is rerendered. The
+       code first verifies that the user is logged in with the same username
+       as the image owner. If a user attempts to delete an image they do not
+       own, an error message is displayed, and the image is not deleted.
+
+2014-04-10  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * Project 15: I added account creation, login, and authentication.
+
+     Login: I added the "users" table to the database to store usernames and
+       passwords.  The login page verifies a correct username/password
+       combination from the database and sets the "User" cookie to the
+       username. The login status is displayed on the top of the left menu. The
+       logout menu link sets the cookie to "null". JavaScripts on the base.html
+       page displays the login status and username if logged in.
+
+     Account Creation: A link from the login page takes you to the account
+       creation page. New account usernames are checked to see if they already
+       exist in the database. Usernames and  passwords must not be empty, and
+       must only contain alphanumeric characters. The successful creation of an
+       account does not change the login status of the user.  All users and
+       passwords can be seen (and deleted) by selecting the "Users List" link
+       on the left menu.
+
+2014-04-05  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * ChangeLog: I started adding the newest logs to the top
+ * image.py: Was replaced with sqlite.py
+ * galley.html: The formatting and title were fixed, and the indexes were added
+ * touching.css: I added the table elements for galley.html
+ * Project 4: I imported guess_type from mimetypes and added jpeg and tiff
+       images. I made minor changes to sqlite.py and root.py for the needed
+       functionality. The names of the files are used to determine their type,
+       so any files uploaded MUST have a .png or whatever at the end of their
+       name to work (like dice.png). Note: I don't think Chrome or Firefox
+       support tiff images, but Safari does.
+ * Project 5: I migrated the thumbnail gallery to imageapp
+
+2014-04-04  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * Project 16: I added a SQLite database to store the images. The database is
+       created if the .sqlite file doesn't already exist. After being created,
+       it is loaded with the images from /images, and the image_metadata.txt
+       file in /imageapp. The app works as usual, there are no noticable
+       differences on the front-end.
+
+2014-04-03  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * cookieapp.py: I added the cookie app code
+ * server.py: I added the cookie app to the options with "-A cookie"
+ * twill-tests/cookieapp.twill: I added the twill tests from /day23
+
+2014-04-01  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * Project 7: I added the ability to search the image metadata. Just use the
+       search link on the sidebar to search the images by name and/or
+       description. If an image is selected after being searched for, it is
+       moved to the end of the images list (making it the latest image). The
+       searches are not case sensitive. A file name search will return all
+       exact matches, while a description search will return all files with
+       the word(s) surrounded by anything. Select the "Image List" link on
+       the left menu for a list of all image names and descriptions in the db.
+
+2014-03-30  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * imageapp/search.html: Added this to search image metadata
+
+2014-03-29  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * imageapp/__init__.py: I changed it to load the dice.png file from the
+       images folder where all the images are instead of the imageapp folder
+ * Project 6: I added metadata uploading to the imageapp. The name and
+       description of the image are stored in a dictionary with the image.
+
+2014-03-25  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * imageapp/root.py: It now exports the CSS background images so they will
+       appear on the web site
+ * imageapp/html.py: It opens and reads the background images in the CSS and
+       returns them to root.py
+
+2014-03-23  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * imageapp/templates: Added the "Touching" css to imageapp
+ * Project 3: I added the Touching CSS to imageapp
+
+2014-03-21  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * chat: Added the app files
+ * quotes: Added the app files
+ * server.py: Added the code to run the chat and quotes apps
+
+2014-03-16  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * render.py: Removed
+ * test_server.py: Updated to send arguments to main()
+ * images.html: Fixed the href tag
+ * images_thumb.html: Added new page with thumbnail images
+ * Project 5: I created an /images_thumb page out of the thumbnails of the
+       images from the /images page. It is listed in index.html and is tested
+       like all the other pages. The html (images_thumb.html) loops through
+       the images, displaying them (reduced to 50 X 50 pixels), 4 per row. Like
+       images.html, they are in alphabetic order, and will appear on a new page
+       in full size if the image is selected.
+
+2014-03-15  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * ref-server.py: Removed
+ * twill-tests: Added all twill tests
+ * images: Added 2 more images to test the project
+
+2014-02-28  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * imageapp: Added the imageapp directory
+ * app.py: Made the files list sorted
+ * un-qx-server.py: Fixed it to test cookies
+
+2014-02-21  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Added the WSGI validation
+ * test_app.py: Added tests for the new text file and image stuff
+
+2014-02-20  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * app.py: Added the text file and image functionality
+ * file: Added the file folder with some test files
+ * images: Added the images folder with some test files
+
+2014-02-12  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * app.py: Fixed the post part
+ * server.py: Added it back with hw5 changes and socketmodule
+ * test_server.py: Added it back with main() test
+
+2014-02-11  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * app.py: Added the encoding line for template rendering
+ * added the s2.html template for posts
+
+2014-02-09  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Removed from hw5
+ * test_server.py: Removed from hw5
+ * ref-server.py: Added for hw5
+ * app.py: Started on for hw5
+ * test_app.py: Started on for hw5
+
+2014-02-06  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Added the multipart post stuff
+ * test_server.py: Altered the tests to work with the new stuff
+
+2014-02-04  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Added the recv() functionality
+ * test_server.py: Altered the tests to work with the templates
+
+2014-01-31  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Added the error page
+ * test_server.py: Added the test for the error page
+
+2014-01-30  Matheus Araujo <araujoma@cse.msu.edu>
+
+ * Really Good code, could improve with main() and get_submit() tests
+
+2014-01-30  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * test_server.py: Fixed name of one of the test methods
+
+2014-01-26  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Added homework 3 code
+ * test_server.py: Added tests for homework 3
+
+2014-01-19  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Added homework 2 code
+ * test_server.py: Added tests for homework 2
+
+2014-01-18  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Addressed homework 1 review comments
+
+2014-01-10  Jason Lefler <leflerja@arctic.cse.msu.edu>
+
+ * server.py: Added the HTTP 1.0 response
+
 2014-01-07  Titus Brown  <t@Titus-MacBook-Air-2.local>
 
  * Initialized repository, created server.py and README.
-
-2014-01-14 Cameron Keif
- * Return HTTP response to client
-
-2014-01-22 Cameron Keif
- * Added test_server.py for automated testing.
- * Return different responses for /, /content, /file, and /image paths.
- * Differentiate between GET and POST requests.
-
-2014-01-29 Cameron Keif
- * Added support for HTML forms, using both GET and POST.
-
-2014-02-6 Cameron Keif
-* Can now handle POST requests with Content-Type of multipart/form-data
-* Read requests of arbitrary size
-* Utilize HTML templating
-* Add 404 page
-
-2014-02-13 Cameron Keif
-* Refactor to WSGI application architecture
-* Utilize HTML templating inheritance
-
-2014-02-20 Cameron Keif
-* /file and /image now serve the appropriate content types, text/plain and image/jpeg
-* Utilize wsgiref validator
-* Add and test with Quixote demo apps
-
-2014-20-27 Cameron Keif
-* Add cookie header handling to WSGI server
-* Add image upload application, imageapp
-* Modified imageapp to display latest image on index page
-
-2014-3-20 Cameron Keif
-* Implemented command line options in server.py to run imageapp, quixote demo app, and app.py
-* Add twill tests for all 3 applications
-* PROJECT: Change imageapp to support JPEG and TIFF. (5pts)
-    
-    - Summary: imageapp will now allow users to upload JPEG and TIFF images instead
-      of only PNGs and display them. PNG images are still supported. Most browsers
-      don't support TIFF very well without extensions.
-
-    - This was primarily done by modifying the code in imageapp/image.py and 
-      imageapp/root.py.
-
-    - In image.py, I add_image was modified to accept an additional parameter, filename, 
-      which is the filename of the image. This is added in a tuple with the image data 
-      to the images dictionary in the form (filename, data).
-
-    - Now, get_image/get_latest_image will return (filename, data). This is utilized in
-      root.py. In image_raw, rather than setting the reponse content type to image/png,
-      the filename is parsed to find the extension. That file extension is used to
-      determine what the content type should be set to (image/jpeg for .jpg/.jpeg and
-      image/tiff for .tif/.tiff). The file extension is not case senstive, .TIF will
-      work just as .tif would.
-
-2014-3-20 Cameron Keif
-  * Integrated quotes app
-  * Integrated chat app and added a timestamp to each image in the chat window
-  * PROJECT: Add a URL that provides a list of images, resized to thumbnails (you can just img size, not
-    actual resizing – that will be a separate project ;).
-
-    - Summary: There's a link on the index page to see a list of all the images that were uploaded. It shows
-      the most recently updated image first.
-
-    - I added a check in get_image_raw() to see if the request included a query parameter "num". If so, 
-      rather than getting the most recent image, it gets the image at images[num]. I also added a method to
-      return the count of images. Using these two things, I can make a few ajax calls in the image list page
-      to iterate over images and display every image.
-
-2014-4-2 Cameron Keif
-  * PROJECT: Add the ability to comment on images
-    - You can post a comment on an image from the /image page.
-
-    - I made an Image class that has a list of comments for that string.
-
-    - A request to the get_comments url provided an image number returns XML containing all of its comments.
-      If the image number is not included it defaults to the latest image
-
-  * PROJECT: Add url handler to refer to each image by its number.
-    - /image_raw?imageNum=# will return the image with num = #.
-
-    - If # is not numeric, or is off the end of the list, it defaults to the latest image.
-
-    - If you go to the images list ( /image_list ) each image is a link to the URL for that image (so the
-      second to the bottom image links to /image?imageNum=1 for example)
-
-2014-4-9 Cameron Keif
-	* Implement cookie app
-	* Utilize SQLite to store images
-	* PROJECT: Add data persistence in sqlite
-
-	- I decided to expand on the SQLite stuff and utilize SQlite to store my
-	  comments and other stuff as well. It's an actual website now omg. :)
-
-	* PROJECT: Add starring, ranking, and a simple recommendation system for
-	  your image app image list.
-
-	- I added a field in the image_store table to hold the image's score.
-
-	- On the image page you can upvote/downvote images. Once I have
-	  authentication I can change this so each user can only upvote/downvote
-		once. For now, you can just click it as much as you want.

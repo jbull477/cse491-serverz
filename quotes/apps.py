@@ -33,7 +33,8 @@ class FileServer(object):
       
       print 'url:' + url
       if url.endswith('/'):
-          url += 'index.html'
+#          url += 'index.html'
+          url += 'quotes-2.html'
           
       fullpath = self.path + url
       fullpath = os.path.abspath(fullpath)

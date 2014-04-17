@@ -1,20 +1,150 @@
 import quixote
 from quixote.directory import Directory, export, subdir
-from quixote.util import StaticFile
-import os.path
 
-from . import html, image
+from . import html, sqlite
 
 class RootDirectory(Directory):
     _q_exports = []
 
-    @export(name='')                    # this makes it public.
+    @export(name='')
     def index(self):
-        return html.render('index.html')
+        posts = sqlite.get_comments()
+        return html.render('image.html', posts)
 
-    @export(name='jquery')
-    def jquery(self):
-        return open('jquery-1.11.0.min.js').read()
+    @export(name='add_comment')
+    def add_comment(self):
+        request = quixote.get_request()
+        user = request.get_cookie('User')
+        comment = request.form['comm']
+
+        message = sqlite.check_comment(user, comment)
+        posts = sqlite.get_comments()
+        posts['message'] = []
+        posts['message'].append(dict(alert=message))
+
+        return html.render('image.html', posts)
+
+    @export(name='create_user')
+    def create_user(self):
+        return html.render('create_user.html')
+
+    @export(name='create_account')
+    def create_account(self):
+        request = quixote.get_request()
+
+        name = request.form['username']
+        password = request.form['password']
+        results = sqlite.create_account(name, password)
+
+        return html.render('create_user.html', results)
+
+    @export(name='css')
+    def css(self):
+        response = quixote.get_response()
+        response.set_content_type('text/css')
+        return html.load_file('touching.css')
+
+    @export(name='delete_comment')
+    def delete_comment(self):
+        request = quixote.get_request()
+        comm_owner = request.get_cookie('User')
+
+        message = sqlite.delete_comment(request.form, comm_owner)
+        posts = sqlite.get_comments()
+        posts['message'] = []
+        posts['message'].append(dict(alert=message))
+
+        return html.render('image.html', posts)
+
+    @export(name='delete_image')
+    def delete_image(self):
+        request = quixote.get_request()
+        file_owner = request.get_cookie('User')
+
+        message = sqlite.delete_image(request.form, file_owner)
+        results = sqlite.get_image_list()
+        results['message'] = []
+        results['message'].append(dict(alert=message))
+
+        return html.render('image_list.html', results)
+
+    @export(name='delete_user')
+    def delete_user(self):
+        request = quixote.get_request()
+        sqlite.delete_user(request.form)
+        results = sqlite.users_list()
+        return html.render('users.html', results)
+
+    @export(name='image_list')
+    def image_list(self):
+        results = sqlite.get_image_list()
+        return html.render('image_list.html', results)
+
+    @export(name='image')
+    def image(self):
+        posts = sqlite.get_comments()
+        return html.render('image.html', posts)
+
+    @export(name='image_raw')
+    def image_raw(self):
+        response = quixote.get_response()
+        img, type = sqlite.get_latest_image()
+        response.set_content_type(type)
+        return img
+
+    @export(name='image_thumb')
+    def image_thumb(self):
+        request = quixote.get_request()
+        img = sqlite.get_image_thumb(request.form)
+        return img
+
+    @export(name='login')
+    def login(self):
+        return html.render('login.html')
+
+    @export(name='login_user')
+    def login_user(self):
+        request = quixote.get_request()
+
+        name = request.form['username']
+        password = request.form['password']
+        cookie, results = sqlite.login(name, password)
+
+        if cookie:
+            request.response.set_cookie('User', name)
+        return html.render('login.html', results)
+
+    @export(name='logout')
+    def logout(self):
+        quixote.get_response().set_cookie('User', "null")
+        return quixote.redirect('./')
+
+    @export(name='search')
+    def search(self):
+        return html.render('search.html')
+
+    @export(name='search_result')
+    def search_result(self):
+        request = quixote.get_request()
+
+        file_name = request.form['name']
+        file_owner = request.form['owner']
+        file_desc = request.form['desc']
+
+        results = sqlite.image_search(file_name, file_owner, file_desc)
+        return html.render('search_results.html', results)
+
+    @export(name='thumb')
+    def image_thumbnails(self):
+        results = sqlite.get_indexes()
+        return html.render('thumbnail.html', results)
+
+    @export(name='update_latest')
+    def update_latest(self):
+        request = quixote.get_request()
+        sqlite.update_latest(request.form)
+        posts = sqlite.get_comments()
+        return html.render('image.html', posts)
 
     @export(name='upload')
     def upload(self):
@@ -23,144 +153,48 @@ class RootDirectory(Directory):
     @export(name='upload_receive')
     def upload_receive(self):
         request = quixote.get_request()
-        print request.form.keys()
 
-        the_file = request.form['file']
-        print dir(the_file)
-        print 'received file with name:', the_file.base_filename
-        data = the_file.read(the_file.get_size())
+        f_data = request.form['file']
+        f_name = request.form['name']
+        f_owner = request.get_cookie('User')
+        f_desc = request.form['desc']
 
-        image.add_image(the_file.base_filename, data)
+        message = sqlite.upload_image(f_data, f_name, f_owner, f_desc)
+        return html.render('upload.html', message)
 
-        return quixote.redirect('./')
+    @export(name='users')
+    def users(self):
+        results = sqlite.users_list()
+        return html.render('users.html', results)
 
-    @export(name='upload2')
-    def upload2(self):
-        return html.render('upload2.html')
+# The below functions are needed for the CSS background images
 
-    @export(name='upload2_receive')
-    def upload2_receive(self):
-        request = quixote.get_request()
-        print request.form.keys()
+    @export(name='body.jpg')
+    def body_jpg(self):
+        data = html.get_image('body.jpg')
+        return data
 
-        the_file = request.form['file']
-        print dir(the_file)
-        print 'received file with name:', the_file.base_filename
-        data = the_file.read(the_file.get_size())
+    @export(name='content.jpg')
+    def content_jpg(self):
+        data = html.get_image('content.jpg')
+        return data
 
-        image.add_image(the_file.base_filename, data)
+    @export(name='footer.gif')
+    def footer_gif(self):
+        data = html.get_image('footer.gif')
+        return data
 
-        return html.render('upload2_received.html')
+    @export(name='header.jpg')
+    def header_jpg(self):
+        data = html.get_image('header.jpg')
+        return data
 
-    @export(name='image')
-    def image(self):
-        return html.render('image.html')
+    @export(name='menubottom.jpg')
+    def menubottom_jpg(self):
+        data = html.get_image('menubottom.jpg')
+        return data
 
-    @export(name='image_list')
-    def image_list(self):
-        return html.render('image_list.html')
-
-    @export(name='image_count')
-    def image_count(self):
-        return image.get_num_images()
-
-    @export(name='image_raw')
-    def image_raw(self):
-        response = quixote.get_response()
-        request = quixote.get_request()
-
-        try:
-            i = int(request.form['num'])
-        except:
-            i = -1
-
-        img = image.retrieve_image(i)
-
-        filename = img.filename
-        if filename.lower() in ('jpg', 'jpeg'):
-            response.set_content_type('image/jpeg')
-        elif filename.lower() in ('tif',' tiff'):
-            response.set_content_type('image/tiff')
-        else: # Default to .png for reasons
-            response.set_content_type('image/png')
-        return img.data
-
-    @export(name='get_comments')
-    def get_comments(self):
-        response = quixote.get_response()
-        request = quixote.get_request()
-
-        try:
-            i = int(request.form['num'])
-        except:
-            i = -1
-
-        all_comments = []
-        for comment in image.get_comments(i):
-            all_comments.append("""\
-    <comment>
-     <text>%s</text>
-    </comment>
-    """ % (comment))
-
-        xml = """
-    <?xml version="1.0"?>
-    <comments>
-    %s
-    </comments>
-    """ % ("".join(all_comments))
-
-        return xml
-
-    @export(name='add_comment')
-    def add_comment(self):
-        response = quixote.get_response()
-        request = quixote.get_request()
-
-        try:
-            i = int(request.form['num'])
-        except:
-            i = -1
-
-        try:
-            comment = request.form['comment']
-        except:
-            return
-
-        image.add_comment(i, comment)
-
-    @export(name='get_score')
-    def get_score(self):
-        response = quixote.get_response()
-        request = quixote.get_request()
-
-        try:
-            i = int(request.form['num'])
-        except:
-            i = -1
-
-        return image.get_image_score(i)
-
-    @export(name='increment_score')
-    def increment_score(self):
-        response = quixote.get_response()
-        request = quixote.get_request()
-
-        try:
-            i = int(request.form['num'])
-        except:
-            i = -1
-
-        image.increment_image_score(i)
-
-    @export(name='decrement_score')
-    def decrement_score(self):
-        response = quixote.get_response()
-        request = quixote.get_request()
-
-        try:
-            i = int(request.form['num'])
-        except:
-            i = -1
-
-        image.decrement_image_score(i)
+    @export(name='menuhover.gif')
+    def menuhover_gif(self):
+        data = html.get_image('menuhover.gif')
+        return data
