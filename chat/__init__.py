@@ -1,7 +1,4 @@
-# __init__.py is the top level file in a Python package.
+from apps import ChatApp
 
-def setup():                            # stuff that should be run once.
-    'setup'
-
-def teardown():                         # stuff that should be run once.
-    pass
+def create_chat_app(files_path):
+    return ChatApp(files_path)
