@@ -1,122 +1,160 @@
-#! /usr/bin/env python
-
+#!/usr/bin/env python
+import random
+import socket
+import time
+import urlparse
 import cgi
-import jinja2
-import os
-import traceback
-import urllib
+import render
 from StringIO import StringIO
-from urlparse import urlparse, parse_qs
-from wsgiref.simple_server import make_server
+from wsgiref.util import setup_testing_defaults
 
+# --------------------------------------------------------------------------------
+#                                 Gets 
+# --------------------------------------------------------------------------------
 
-def render_page(page, params):
-    loader = jinja2.FileSystemLoader('./templates')
-    env = jinja2.Environment(loader=loader)
-    template = env.get_template(page)
-    x = template.render(params).encode('latin-1', 'replace')
-    return str(x)
+def index_html():
+    vars_dict = {'content_url': '/content', 'file_url': '/file', 
+            'image_url': '/image', 'form_url': '/form', 'form_post_url': '/formPost',
+            'form_post_multipart_url': '/formPostMultipart'}
+    urls = render.render('index.html', vars_dict).encode('latin-1', 'replace')
+    return urls
 
-# Get a sorted list of all files in a directory
-def get_contents(dir):
-    list = []
-    for file in sorted(os.listdir(dir)):
-        list.append(file)
-    return list
+def content_html():
+    html = render.render('content.html').encode('latin-1', 'replace')
+    return html
 
-def get_file(file_in):
-    fp = open(file_in, 'rb')
-    data = [fp.read()]
-    fp.close
-    return data
+def file_html():
+    # html = render.render('file.html').encode('latin-1', 'replace')
+    html = 'This is a plain text document.'
+    return html
 
-class MyApp(object):
-    def __call__(self, environ, start_response):
-        options = {'/'             : self.index,
-                   '/content'      : self.content,
-                   '/files'        : self.files,
-                   '/images'       : self.images,
-                   '/images_thumb' : self.images_thumb,
-                   '/form'         : self.form,
-                   '/submit'       : self.submit  }
+def image_html():
+    fp = open('./images/justin_eli.jpg', 'rb')
+    data = fp.read()
+    fp.close()
 
-        path = environ['PATH_INFO']
-        if path[:5] == '/text':
-            return self.text(environ, start_response) 
-        elif path[:5] == '/pics':
-            return self.pics(environ, start_response) 
-        page = options.get(path)
+    html = render.render('image.html').encode('latin-1', 'replace')
+    return data 
 
-        if page is None:
-            return self.error(environ, start_response)
+def form_html():
+    vars_dict = {'submit_url': '/submit'}
+    html = render.render('form.html', vars_dict).encode('latin-1', 'replace')
+    return html
 
-        return page(environ, start_response)
+def submit_html(environ):
+    query = environ['QUERY_STRING']
 
-    def error(self, environ, start_response):
-        start_response('404 Not Found', [('Content-type', 'text/html')])
-        return render_page('error.html','')
+    html = ''
+    res = urlparse.parse_qs(query)
+    if len(res) < 2: # check if the input was valid
+        html = render.render('error.html').encode('latin-1', 'replace')
+    else:
+        vars_dict = {'firstname': res['firstname'][0], 
+            'lastname': res['lastname'][0]}
+        html = render.render('submit.html', vars_dict).encode('latin-1', 'replace')
 
-    def index(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'text/html')])
-        return render_page('index.html','')
+    return html
 
-    def content(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'text/html')])
-        return render_page('content.html','')
+def urlencoded_html(form):
+# query_string = environ['QUERY_STRING']
 
-    def files(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'text/html')])
-        params = dict(names=get_contents('files'))
-        return render_page('files.html', params)
+    if 'firstname' not in form or 'lastname' not in form:
+        html = render.render('error.html').encode('latin-1', 'replace')
+    else:
+        vars_dict = {'firstname': form['firstname'].value,\
+            'lastname': form['lastname'].value}
+        html = render.render('urlencoded.html', vars_dict).encode('latin-1', 'replace')
 
-    def images(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'text/html')])
-        params = dict(names=get_contents('images'))
-        return render_page('images.html', params)
+    return html
 
-    def images_thumb(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'text/html')])
-        params = dict(names=get_contents('images'))
-        return render_page('images_thumb.html', params)
+def multipart_html(form):
+    html = render.render('multipart.html').encode('latin-1', 'replace')
+    return html
+    # TODO: print 'form: ', form['files'].value
 
-    def form(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'text/html')])
-        return render_page('form.html','')
+def send_404_html():
+    return '404 Not Found'
 
-    def submit(self, environ, start_response):
-        method = environ['REQUEST_METHOD']
-        if method == 'GET':
-            return self.handle_get(environ, start_response)
-        else:
-            return self.handle_post(environ, start_response)
+def error_html():
+    html = render.render('error.html').encode('latin-1', 'replace')
+    return html
+    
+# def handle_get(path, conn):
+def handle_get(environ, headers):
+    if environ['PATH_INFO'] == '/':
+        return index_html()
+    elif environ['PATH_INFO'] == '/content':
+        return content_html()
+    elif environ['PATH_INFO'] == '/file':
+        headers[0] = ('Content-type', 'text/plain')
+        return file_html()
+    elif environ['PATH_INFO'] == '/image':
+        headers[0] = ('Content-type', 'image/jpg')
+        return image_html()
+    elif environ['PATH_INFO'] == '/form':
+        return form_html()
+    elif environ['PATH_INFO'] == '/formPost':
+        return form_post_html()
+    elif environ['PATH_INFO'] == '/formPostMultipart':
+        return form_post_multipart_html(environ)
+    elif environ['PATH_INFO'].startswith('/submit'):
+        return submit_html(environ)
+    else:
+        return send_404_html()
 
-    def handle_get(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'text/html')])
-        params = parse_qs(environ['QUERY_STRING'])
-        return render_page('submit.html', params)
+# --------------------------------------------------------------------------------
+#                                  Posts
+# --------------------------------------------------------------------------------
 
-    def handle_post(self, environ, start_response):
-        con_type = environ['CONTENT_TYPE']
-        headers = {}
-        params ={} 
-        for k, v in environ.iteritems():
-            headers['content-type'] = environ['CONTENT_TYPE']
-            headers['content-length'] = environ['CONTENT_LENGTH']
-            fs = cgi.FieldStorage(fp=environ['wsgi.input'], \
-                                  headers=headers, environ=environ)
-            params.update({x: [fs[x].value] for x in fs.keys()}) 
-        start_response('200 OK', [('Content-type', con_type)])
-        return render_page('submit.html', params)
+def form_post_html():
+    vars_dict = {'submit_url': '/submit'}
 
-    def text(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'text/plain')])
-        text_file = './files' + environ['PATH_INFO'][5:]
-        return get_file(text_file)
+    html = render.render('form_post.html', vars_dict).encode('latin-1', 'replace')
+    return html
 
-    def pics(self, environ, start_response):
-        start_response('200 OK', [('Content-type', 'image/png')])
-        pic_file = './images' + environ['PATH_INFO'][5:]
-        return get_file(pic_file)
+def form_post_multipart_html(form):
+    vars_dict = {'submit_url': '/submit'}
+
+    html = render.render('form_post_multipart.html', vars_dict).encode('latin-1', 'replace')
+    return html
+    # TODO: print 'form: ', form['files'].value
+
+def handle_post(environ):
+    headers = {}
+    for k in environ.keys():
+        headers[k.lower()] = environ[k]
+
+    form = cgi.FieldStorage(headers=headers, fp=environ['wsgi.input'],\
+            environ=environ)
+
+    print 'form: ', form
+
+    if 'application/x-www-form-urlencoded' in environ['CONTENT_TYPE']:
+        return urlencoded_html(form)
+    elif 'multipart/form-data;' in environ['CONTENT_TYPE']:
+        return multipart_html(form)
+    else:
+        return error_html()
+
+# from http://docs.python.org/2/library/wsgiref.html
+
+# referenced bjurgess1
+# A relatively simple WSGI application. It's going to print out the
+# environment dictionary after being updated by setup_testing_defaults
+def simple_app(environ, start_response):
+    setup_testing_defaults(environ)
+
+    status = '200 OK'
+    headers = [('Content-type', 'text/html')]
+    response = ''
+
+    if environ['REQUEST_METHOD'] == 'GET':
+        response = handle_get(environ, headers)
+    elif environ['REQUEST_METHOD'] == 'POST':
+        response = handle_post(environ)
+
+    start_response(status, headers)
+    return [response]
 
 def make_app():
-    return MyApp()
+    return simple_app

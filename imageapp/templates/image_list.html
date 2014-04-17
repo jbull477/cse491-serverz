@@ -2,39 +2,14 @@
 
 {% block content %}
 
-<h2>Image List:</h2>
-
-{% if message %}
-  {% for i in message %}
-  <p>{{ i['alert'] }}</p>
-  {% endfor %}
-{% endif %}
-
-{% if results %}
-
-<table border=1 cellpadding=1 cellspacing=1>
-  <tr>
-    <th>Name</th>
-    <th>Description</th>
-    <th>Owner</th>
-    <th></th>
-  </tr>
-
-  {% for i in results %}
-  <tr>
-    <td>
-      <a href=update_latest?i={{ i['index'] }}>{{ i['name'] }}</a>
-    </td>
-    <td valign="top">{{ i['desc'] }}</td>
-    <td valign="top">{{ i['owner'] }}</td>
-    <td valign="top">
-      <a href=delete_image?i={{ i['index'] }}>delete</a>
-    </td>
-  </tr>
-  {% endfor %}
-
-</table>
-{% else %} <p>No image found</p>
-{% endif %}
+Here is your list of images:
+<br/>
+<script type="text/javascript">
+num_images = {{ num_images }}
+for (var i=0;i<num_images;i++)
+{
+  document.write("<img border='2' style='max-height:150px; max-width:150px' src='image_raw?num=" + i + "'/><br/>");
+}
+</script>
 
 {% endblock %}

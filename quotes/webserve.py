@@ -103,8 +103,7 @@ class Server(object):
         return False, data_so_far
 
     def serve_forever(self):
-        print 'The Web server URL for this would be ' \
-              'http://arctic.cse.msu.edu:%d/' % (self.port)
+        print "binding '%s', port %d" % ('', self.port)
         sock = socket.socket()
         sock.bind( ('', self.port) )
         sock.listen(5)
