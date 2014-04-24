@@ -1,84 +1,168 @@
 # image handling API
-from . import imageapp_sql
-from time import time, strftime
-from PIL import Image, ImageFile
-from StringIO import StringIO
+import sqlite3
+import sys
 
-# store it as a list
-images = []
+class Image:
+    filename = ''
+    data = ''
+    score = 0
+    def __init__(self, filename, data, score):
+        self.filename = filename
+        self.data = data
+        self.score = score
 
-def add_image(image, datatype):
-    # print 'images.keys() again', images.keys()
-    if images:
-        image_num = len(images)
-        #image_num = max(images.keys()) + 1
-    else:
-        image_num = 0
+images = {}
 
-    # images[image_num] = data, datatype
-    images.append(image)
-    imageapp_sql.insert(image)
-    return image_num
+def add_image(filename, username, data):
+    # insert to database
+    insert_image(filename, username, data)
 
 def get_image(num):
-    return images[num]
+    return retrieve_image(num)
 
 def get_latest_image():
-    # image_num = max(images.keys())
-    image_num = len(images) - 1
-    if image_num < 0:
-        return None
+    return retrieve_image(-1)
+
+def insert_image(filename, username, data):
+    # connect to the already existing database
+    db = sqlite3.connect('images.sqlite')
+
+    # configure to allow binary insertions
+    db.text_factory = bytes
+
+    # grab whatever it is you want to put in the database
+    print username
+    # insert!
+    db.execute('INSERT INTO image_store (filename, owner, score, image) \
+        VALUES (?,?,?,?)', (filename, username, 1, data))
+    db.commit()
+
+# retrieve an image from the database.
+def retrieve_image(i):
+    # connect to database
+    db = sqlite3.connect('images.sqlite')
+    
+    # configure to retrieve bytes, not text
+    db.text_factory = bytes
+
+    # get a query handle (or "cursor")
+    c = db.cursor()
+
+    # select all of the images
+    if i >= 0:
+        c.execute('SELECT i, filename, score, image FROM image_store where i=(?)', (i,))
     else:
-        return images[image_num]
+        c.execute('SELECT i, filename, score, image FROM image_store ORDER BY i DESC LIMIT 1')
 
-def get_image_num():
-    return len(images)
-    # return max(images.keys())
-
-def load_images(aDict):
-    img = create_image_dict(data = aDict["data"], fileName = aDict["file_name"],
-                                               description = aDict["description"])
-    images.append(img)
-
-def create_image_dict(data = "", fileName = "dice.png", 
-    description = "No description available"):
-    img = {"data" : data}
-    img["file_name"] = fileName
-    img["description"] = description
-    img["commentList"] = []
-    img["thumbnail"] = resize_image(data)
-                            
-    return img
-
-def add_comment(img, comment):
-    commentList = img["commentList"]
-    commentList.append(comment)
-    img["commentList"] = commentList
-
-    return img 
-
-def get_comments(img):
-    return img["commentList"]
-
-def resize_image(image_data):
-    # adjust width and height to your needs
-    new_image_size = 150, 150
-
-    # read data into PIL image
-    p = ImageFile.Parser()
-    img = None
+    # grab the first result (this will fail if no results!)
     try:
-        p.feed(image_data)
-        img = p.close()
-    except Exception, msg:
-        print "error resizing:", msg
+        i, filename, score, image = c.fetchone()
 
-    if img == None:
-        print 'did not work'
+        return Image(filename, image, score)
+    except:
+        pass
+
+def add_comment(i, comment):
+    db = sqlite3.connect('images.sqlite')
+   
+    if i == -1:
+        c = db.cursor()
+
+        # Latest image
+        c.execute('SELECT i FROM image_store ORDER BY i DESC LIMIT 1')
+        try:
+            i = c.fetchone()[0]
+        except:
+            return
+
+    db.execute('INSERT INTO image_comments (imageId, comment) VALUES (?,?)', (i, comment))
+    db.commit()
+
+def get_comments(i):
+    comments = []
+    db = sqlite3.connect('images.sqlite')
+
+    # Get all the comments for this image
+    c = db.cursor()
+    if i == -1:
+        # Latest image
+        c.execute('SELECT i FROM image_store ORDER BY i DESC LIMIT 1')
+        try:
+            i = c.fetchone()[0]
+        except:
+            return
+
+    c.execute('SELECT i, comment FROM image_comments WHERE imageId=(?) ORDER BY i DESC', (i,))
+    for row in c:
+        comments.append(row[1])
+
+    return comments
+
+def get_owner(i):
+    # connect to database
+    db = sqlite3.connect('images.sqlite')
+
+    # get a query handle (or "cursor")
+    c = db.cursor()
+
+    # select all of the images
+    if i >= 0:
+        c.execute('SELECT owner FROM image_store where i=(?)', (i,))
     else:
-        fp = StringIO()
-        img.thumbnail(new_image_size, Image.ANTIALIAS)
-        img.save(fp, format="PNG")
-        fp.seek(0)
-        return fp.read()
+        c.execute('SELECT owner FROM image_store ORDER BY i DESC LIMIT 1')
 
+    return c.fetchone()[0]
+
+def get_image_score(i):
+    # connect to database
+    db = sqlite3.connect('images.sqlite')
+
+    # get a query handle (or "cursor")
+    c = db.cursor()
+
+    # select all of the images
+    if i >= 0:
+        c.execute('SELECT score FROM image_store where i=(?)', (i,))
+    else:
+        c.execute('SELECT score FROM image_store ORDER BY i DESC LIMIT 1')
+
+    val = int(c.fetchone()[0])
+    return val
+
+def increment_image_score(i):
+# connect to database
+    db = sqlite3.connect('images.sqlite')
+
+    if i < 0:
+        i = get_num_images()
+
+    db.execute('UPDATE image_store SET score = score + 1 where i=(?)', (i,))
+    db.commit()
+
+def decrement_image_score(i):
+# connect to database
+    db = sqlite3.connect('images.sqlite')
+
+    if i < 0:
+        i = get_num_images()
+
+    db.execute('UPDATE image_store SET score = score - 1 where i=(?)', (i,))
+    db.commit()
+
+def get_image_numbers():
+    db = sqlite3.connect('images.sqlite')
+    c = db.cursor()
+    c.execute('SELECT i FROM image_store ORDER BY i')
+    nums = []
+
+    for num in c.fetchall():
+        nums.append(num[0])
+
+    print nums
+    return nums
+
+def delete_image(i):
+    db = sqlite3.connect('images.sqlite')
+    print(i)
+    db.execute('DELETE FROM image_store WHERE i=(?)', (i,))
+    db.commit()

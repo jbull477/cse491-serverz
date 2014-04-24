@@ -2,14 +2,25 @@
 
 {% block content %}
 
-Here is your list of images:
-<br/>
+<div class="contentTitle">
+<h1>Here are all of the images that have been uploaded!</h1>
+</div>
+<div id="imageContainer">
+</div>
 <script type="text/javascript">
-num_images = {{ num_images }}
-for (var i=0;i<num_images;i++)
-{
-  document.write("<img border='2' style='max-height:150px; max-width:150px' src='image_raw?num=" + i + "'/><br/>");
-}
-</script>
+    $.post("image_numbers",
+         function(numbers) { 
+            numbers = numbers.replace('[', '')
+            numbers = numbers.replace(']', '')
+            numbers = numbers.split(', ')
+            for (var i = numbers.length - 1; i >= 0; i--) {
+                console.log(parseInt(numbers[i]))
 
+                $("#imageContainer").append("<div style='padding-top:10px'>" + 
+                    "<a href='/image?num=" + numbers[i] + "'>" +
+                    "<img width='200' src='image_raw?num=" + numbers[i] + "' /></a></div>");
+            };
+         }
+    );
+</script>
 {% endblock %}

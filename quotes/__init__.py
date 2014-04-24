@@ -1,7 +1,4 @@
-# __init__.py is the top level file in a Python package.
+from apps import *
 
-def setup():                            # stuff that should be run once.
-    'setup'
-
-def teardown():                         # stuff that should be run once.
-    pass
+def create_quotes_app(quotes_file, files_path):
+    return QuotesApp(quotes_file, files_path)

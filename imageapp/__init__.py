@@ -1,10 +1,14 @@
 # __init__.py is the top level file in a Python package.
+import os
+import sqlite3
 
 from quixote.publish import Publisher
 
 # this imports the class RootDirectory from the file 'root.py'
 from .root import RootDirectory
-from . import html, image, imageapp_sql
+from . import html, image
+
+IMAGE_DB_FILE = 'images.sqlite'
 
 def create_publisher():
      p = Publisher(RootDirectory(), display_exceptions='plain')
@@ -13,28 +17,38 @@ def create_publisher():
  
 def setup():                            # stuff that should be run once.
     html.init_templates()
-    # image.load_images()
 
-    # add_test_image()
-    load_images()
-    # some_data = open('imageapp/dice.png', 'rb').read()
-    # image.add_image(some_data, 'png')
+    if not os.path.exists(IMAGE_DB_FILE):
+        create_database()
 
-# Add some default images
-def add_test_image():
-    some_data = open('imageapp/dice.png', 'rb').read()
-    img = image.create_image_dict(data = some_data, fileName = "dice.png",\
-    description = "Dice")
-    image.add_image(img, 'png')
-    '''
-    commentForm = {'i': 0, 'user': 'Justin', 'comment': 'testing'}
-    image.add_comment(commentForm)
-    '''
+    #retrieve_all_images()
 
 def teardown():                         # stuff that should be run once.
     pass
 
-def load_images():
-    imageDictList = imageapp_sql.load_all_images()
-    for imgDict in imageDictList:
-        image.load_images(imgDict)
+def create_database():
+    print 'creating database'
+    db = sqlite3.connect('images.sqlite')
+    db.execute('CREATE TABLE image_store (i INTEGER PRIMARY KEY, filename VARCHAR(255), \
+        owner VARCHAR(30), score INTEGER, image BLOB, \
+        FOREIGN KEY (owner) REFERENCES user(username))');
+    db.execute('CREATE TABLE image_comments (i INTEGER PRIMARY KEY, imageId INTEGER, \
+     comment TEXT, FOREIGN KEY (imageId) REFERENCES image_store(i))');
+    db.execute('CREATE TABLE user (username VARCHAR(30) PRIMARY KEY, \
+        password VARCHAR(30))');
+    db.commit()
+    db.close()
+
+def retrieve_all_images():
+    # connect to database
+    db = sqlite3.connect('images.sqlite')
+    
+    # configure to retrieve bytes, not text
+    db.text_factory = bytes
+
+    # get a query handle (or "cursor")
+    c = db.cursor()
+
+    # select all of the images
+    for row in c.execute('SELECT * FROM image_store ORDER BY i DESC'):
+        open(row[1], 'w').write(row[2])
